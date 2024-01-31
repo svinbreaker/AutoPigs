@@ -9,6 +9,7 @@
 	<ItemGroup>
 		<Folder Include="Entities\" />
 		<Folder Include="Localization\" />
+		<Folder Include="Data\" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -18,12 +19,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="BulbulatorLocalization">
-			<HintPath>..\..\KeyValueLocalization\BulbulatorLocalization\bin\Debug\net8.0\BulbulatorLocalization.dll</HintPath>
-		</Reference>
-		<Reference Include="СrossAppBot">
-		  <HintPath>..\..\СrossAppBot\СrossAppBot\bin\Debug\net8.0\СrossAppBot.dll</HintPath>
-		</Reference>
+	  <ProjectReference Include="..\..\KeyValueLocalization\BulbulatorLocalization\BulbulatorLocalization.csproj" />
+	  <ProjectReference Include="..\..\СrossAppBot\СrossAppBot\СrossAppBot.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="BulbulatorLocalization">
+	    <HintPath>..\..\KeyValueLocalization\BulbulatorLocalization\bin\Debug\net8.0\BulbulatorLocalization.dll</HintPath>
+	  </Reference>
+	  <Reference Include="СrossAppBot">
+	    <HintPath>..\..\СrossAppBot\СrossAppBot\bin\Debug\net8.0\СrossAppBot.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 </Project>

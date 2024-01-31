@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Telegram.Bot.Types;
 using СrossAppBot;
 using СrossAppBot.Commands;
 using СrossAppBot.Entities;

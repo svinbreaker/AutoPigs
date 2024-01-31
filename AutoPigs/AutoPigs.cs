@@ -12,12 +12,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using VkNet.Model;
 using СrossAppBot;
 using СrossAppBot.Commands;
 using СrossAppBot.Commands.Parameters;
 using СrossAppBot.Entities;
 using СrossAppBot.Entities.Files;
+using СrossAppBot.Events;
 
 namespace AutoPigs
 {
@@ -57,7 +57,7 @@ namespace AutoPigs
             }
         }
 
-        private static string _botDataFile = DataPath + $@"tokens.json";
+        private static string _botDataFile = DataPath + $@"botsInfo.json";
 
         public static Task Main(string[] args) => new AutoPigs().MainAsync();
 
@@ -65,14 +65,11 @@ namespace AutoPigs
         {
             dynamic botsData = JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(_botDataFile));
 
-            /*DiscordBotClient discordBot = new DiscordBotClient("MTE4NDY4Mzg4NDcyNjcyMjY1MA.GBNxlL.giM6svLjvDIzG4ZZxslBxcNwDNc6gYIpH40R1w");
-            TelegramBotClient telegramBot = new TelegramBotClient("6342451970:AAE-eVaK-nbkJ7FUmipVCxNhmJWHzm-Fh_w");
-            VkBotClient vkBot = new VkBotClient("vk1.a.xC_UrO3rEUnqig0QE4XU0d7qMi-GU0LaGl2b8KDBpzBhW476NXJ4KIgddJ2qQ9sQ43O0pT9-_JKLjqfU65d4mufk5GeaEGJS9EVUlr4WcBpEEyu8lgd7WR_SpJac8dl2ssIpEte7PV3nH_DiKoq_C5JHGW4ZdI9NoAtWBVDpXh92SjJUpgb8xmIO2zmF40feqGarO3ICa1AX7C4yJxmxWA", 214675765);*/
-
-            DiscordBotClient discordBot = new DiscordBotClient(Convert.ToString(botsData.discord.token));
-            TelegramBotClient telegramBot = new TelegramBotClient(Convert.ToString(botsData.telegram.token));
             VkBotClient vkBot = new VkBotClient(Convert.ToString(botsData.vk.token), ulong.Parse(Convert.ToString(botsData.vk.groupId)));
-            List<AbstractBotClient> bots = new List<AbstractBotClient> { vkBot };
+            TelegramBotClient telegramBot = new TelegramBotClient(Convert.ToString(botsData.telegram.token));
+            DiscordBotClient discordBot = new DiscordBotClient(Convert.ToString(botsData.discord.token));
+            
+            List<AbstractBotClient> bots = new List<AbstractBotClient> { discordBot, vkBot, telegramBot };
 
             List<AbstractCommand> universalCommands = new List<AbstractCommand>
             {
@@ -88,13 +85,15 @@ namespace AutoPigs
             List<IArgumentParser> parsers = new List<IArgumentParser>() { new PigArgumentParser(), new CategoryArgumentParser() };
             foreach (AbstractBotClient bot in bots)
             {
-                bot.OnMessageReceived += OnMessageReceived;
+                bot.EventManager.Subscribe<MessageReceivedEvent>(OnMessageReceived);
+
                 bot.TextCommandProcessor = new TextCommandProcessor("p.", universalCommands, parsers);
 
                 if (bot is IAddReaction)
                 {
                     bot.TextCommandProcessor.AddCommands(emojiCommands);
                 }
+
                 try
                 {
                     await bot.StartAsync();
@@ -114,8 +113,10 @@ namespace AutoPigs
             bot.StartAsync();
         }
 
-        private static async Task OnMessageReceived(ChatMessage message)
+        private async Task OnMessageReceived(MessageReceivedEvent clientEvent)
         {
+            ChatMessage message = clientEvent.Message;
+
             AbstractBotClient client = message.Client;
 
             ChatGuild guild = message.Guild;
@@ -138,7 +139,7 @@ namespace AutoPigs
             await client.TextCommandProcessor.ProcessCommand(message.Text, message.GetAsCommandContext());
         }
 
-        public static Task onMessageEdited(ChatMessage message)
+        public static Task OnMessageEdited(MessageEditedEvent clientEvent)
         {
             return Task.CompletedTask;
         }

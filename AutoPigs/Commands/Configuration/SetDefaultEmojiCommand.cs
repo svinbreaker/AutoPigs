@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using СrossAppBot.Commands;
 using СrossAppBot;
-using Discord;
 using BulbulatorLocalization;
 using СrossAppBot.Entities;
+
 
 namespace AutoPigs.Commands.Configuration
 {
@@ -28,29 +28,23 @@ namespace AutoPigs.Commands.Configuration
             string result = "ъ";
 
 
-            Emoji emoji = null;
-            Emote emote = null;
+            
             try
             {
                 if (Category == null)
                 {
                     Category = databaseHandler.GetDefaultCategory(guild);
                 }
-                if (!Emoji.TryParse(EnteredEmoji, out emoji) && !Emote.TryParse(EnteredEmoji, out emote))
+                if (!(client as IEmojiable).IsEmoji(EnteredEmoji))
                 {
                     result = "COMMANDS_CONFIGURATION_DEFAULT_EMOJI_DESCRIPTION";
                 }
                 else
                 {
                     CategoryConfig config = databaseHandler.GetCategoryConfig(Category);
-                    if (emote == null)
-                    {
-                        config.ReactionEmoji = emoji.ToString();
-                    }
-                    else
-                    {
-                        config.ReactionEmoji = emote.ToString();
-                    }
+
+                    config.ReactionEmoji = EnteredEmoji;
+                    
                     databaseHandler.Database.Update(config);
                     result = "COMMANDS_CONFIGURATION_DEFAULT_EMOJI_SUCCESS";
                 }
