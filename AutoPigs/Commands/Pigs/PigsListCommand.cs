@@ -47,7 +47,7 @@ namespace AutoPigs.Commands.Pigs
                         {
                             builder.Append($"{category.Name}, ");
                         }
-                        builder.Remove(builder.Length - 1, 1);
+                        builder.Length -= 2;
                         builder.Append(")\n");
                     }
                     result = builder.ToString();

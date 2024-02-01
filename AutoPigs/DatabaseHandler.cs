@@ -217,6 +217,12 @@ namespace AutoPigs
 
             List<BattlePicture> pictures = new List<BattlePicture>();
             string defaultBattlePicturesPath = @$"{AutoPigs.DataPath}{guild.Client.Name}\DefaultBattlePictures";
+
+            if (!Directory.Exists(defaultBattlePicturesPath))
+            {
+                Directory.CreateDirectory(defaultBattlePicturesPath);
+            }
+
             foreach (string battlePicture in Directory.GetFiles(defaultBattlePicturesPath, "*", SearchOption.TopDirectoryOnly))
             {
                 Database.Insert(new BattlePicture(battlePicture, category));
