@@ -68,7 +68,7 @@ namespace AutoPigs
             VkBotClient vkBot = new VkBotClient(Convert.ToString(botsData.vk.token), ulong.Parse(Convert.ToString(botsData.vk.groupId)));
             TelegramBotClient telegramBot = new TelegramBotClient(Convert.ToString(botsData.telegram.token));
             DiscordBotClient discordBot = new DiscordBotClient(Convert.ToString(botsData.discord.token));
-            
+
             List<AbstractBotClient> bots = new List<AbstractBotClient> { discordBot, vkBot, telegramBot };
 
             List<AbstractCommand> universalCommands = new List<AbstractCommand>
@@ -85,6 +85,8 @@ namespace AutoPigs
             List<IArgumentParser> parsers = new List<IArgumentParser>() { new PigArgumentParser(), new CategoryArgumentParser() };
             foreach (AbstractBotClient bot in bots)
             {
+                bot.EventManager.Subscribe<BotConnectedEvent>(OnConnect);
+                bot.EventManager.Subscribe<BotDisconnectedEvent>(OnDisconnect);
                 bot.EventManager.Subscribe<MessageReceivedEvent>(OnMessageReceived);
 
                 bot.TextCommandProcessor = new TextCommandProcessor("p.", universalCommands, parsers);
@@ -92,7 +94,7 @@ namespace AutoPigs
                 if (bot is IAddReaction)
                 {
                     bot.TextCommandProcessor.AddCommands(emojiCommands);
-                }           
+                }
             }
 
             await Task.WhenAll(telegramBot.StartAsync(), discordBot.StartAsync(), vkBot.StartAsync());
@@ -101,6 +103,16 @@ namespace AutoPigs
         private static void StartBot(AbstractBotClient bot)
         {
             bot.StartAsync();
+        }
+
+        private async Task OnConnect(BotConnectedEvent clientEvent)
+        {
+            await Task.CompletedTask;
+        }
+
+        private async Task OnDisconnect(BotDisconnectedEvent clientEvent)
+        {
+            await Task.CompletedTask;
         }
 
         private async Task OnMessageReceived(MessageReceivedEvent clientEvent)
