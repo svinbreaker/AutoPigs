@@ -22,7 +22,7 @@ using СrossAppBot.Events;
 namespace AutoPigs
 {
     class AutoPigs
-    {
+    {//
         public static List<AbstractBotClient> bots { get; set; }
         public static string ProjectPath
         {
@@ -92,20 +92,10 @@ namespace AutoPigs
                 if (bot is IAddReaction)
                 {
                     bot.TextCommandProcessor.AddCommands(emojiCommands);
-                }
-
-                try
-                {
-                    await bot.StartAsync();
-                }
-                catch (Exception exception)
-                {
-                    Console.WriteLine(exception.ToString());
-                    await bot.StartAsync();
-                }
+                }           
             }
 
-            await Task.Delay(-1);
+            await Task.WhenAll(telegramBot.StartAsync(), discordBot.StartAsync(), vkBot.StartAsync());
         }
 
         private static void StartBot(AbstractBotClient bot)
