@@ -75,12 +75,12 @@ namespace AutoPigs
             {
                 new HelpCommand(), new TestCommand(), new SetLanguageCommand(),
                 new PigsAddCommand(), new PigsRemoveCommand(), new PigsListCommand(),
-                new CreateCategoryCommand(), new DeleteCategoryCommand(), new CategoriesListCommand(),
-                new SetPigCategoryCommand(), new RemovePigCategory(),
                 new AddBattlePictureCommand(), new ClearBattlePicturesCommand(),
-                new SetPictureChanceCommand()
+                new SetPictureChanceCommand(),
+                new CreateCategoryCommand(), new DeleteCategoryCommand(), new CategoriesListCommand(),
+                new SetPigCategoryCommand(), new RemovePigCategory(),             
             };
-            List<AbstractCommand> emojiCommands = new List<AbstractCommand> { new SetReactionChanceCommand(), new AddReactionCommand() };
+            List<AbstractCommand> emojiCommands = new List<AbstractCommand> { new AddReactionCommand(), new RemoveReactionCommand(), new SetReactionChanceCommand() };
 
             List<IArgumentParser> parsers = new List<IArgumentParser>() { new PigArgumentParser(), new CategoryArgumentParser() };
             foreach (AbstractBotClient bot in bots)

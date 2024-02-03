@@ -191,7 +191,7 @@ namespace AutoPigs
             Database.Insert(new BattleReaction(emoji, category));
         }
 
-        public async Task RemoveBattleReaction(string emoji, Category category, Guild guild) 
+        public async Task RemoveBattleReaction(string emoji, Category category) 
         {
             List<BattleReaction> emojis = GetBattleEmojis(category);
             BattleReaction emojiToDelete = emojis.Find(e => e.Emoji == emoji);
