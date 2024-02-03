@@ -80,7 +80,7 @@ namespace AutoPigs
                 new AddBattlePictureCommand(), new ClearBattlePicturesCommand(),
                 new SetPictureChanceCommand()
             };
-            List<AbstractCommand> emojiCommands = new List<AbstractCommand> { new SetReactionChanceCommand(), new SetDefaultEmojiCommand() };
+            List<AbstractCommand> emojiCommands = new List<AbstractCommand> { new SetReactionChanceCommand(), new AddReactionCommand() };
 
             List<IArgumentParser> parsers = new List<IArgumentParser>() { new PigArgumentParser(), new CategoryArgumentParser() };
             foreach (AbstractBotClient bot in bots)
@@ -88,6 +88,7 @@ namespace AutoPigs
                 bot.EventManager.Subscribe<BotConnectedEvent>(OnConnect);
                 bot.EventManager.Subscribe<BotDisconnectedEvent>(OnDisconnect);
                 bot.EventManager.Subscribe<MessageReceivedEvent>(OnMessageReceived);
+                bot.EventManager.Subscribe<MessageEditedEvent>(OnMessageEdited);
 
                 bot.TextCommandProcessor = new TextCommandProcessor("p.", universalCommands, parsers);
 
@@ -202,13 +203,23 @@ namespace AutoPigs
                         foreach (Category c in categories)
                         {
                             CategoryConfig cConfig = DatabaseHandler.GetCategoryConfig(c);
-                            string emoji = cConfig.ReactionEmoji;
+                            List<string> emojis = DatabaseHandler.GetBattleEmojis(category).Select(e => e.Emoji).ToList();
                             int reactionChance = cConfig.ReactionChance;
 
-                            if (emoji != null && reactionChance > 0)
+                            if (emojis != null && reactionChance > 0)
                             {
                                 if (random.Next(100) <= reactionChance)
                                 {
+                                    string emoji;
+                                    if (emojis.Count == 1) 
+                                    {
+                                        emoji = emojis[0];
+                                    }
+                                    else 
+                                    {
+                                        emoji = emojis[random.Next(0, emojis.Count - 1)];
+                                    }
+
                                     try
                                     {
                                         await reactableClient.AddReaction(message, emoji);

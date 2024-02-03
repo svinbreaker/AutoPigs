@@ -1,4 +1,5 @@
 ﻿using AutoPigs.Commands;
+using AutoPigs.Tables;
 using SQLite;
 using System;
 using System.Collections.Generic;
@@ -37,6 +38,7 @@ namespace AutoPigs
                 Database.CreateTable<Guild>();
                 Database.CreateTable<GuildConfig>();
                 Database.CreateTable<BattlePicture>();
+                Database.CreateTable<BattleReaction>();
                 Database.CreateTable<Category>();
                 Database.CreateTable<CategoryConfig>();
                 Database.CreateTable<PigsCategories>();
@@ -170,7 +172,7 @@ namespace AutoPigs
 
         public void ClearBattlePictures(Category category, ChatGuild guild)
         {
-            List<BattlePicture> battlePictures = Database.Query<BattlePicture>($"SELECT * FROM BattlePicture WHERE CategoryId = {category.Id}");
+            List<BattlePicture> battlePictures = GetBattlePictures(category);
             battlePictures.ForEach(battlePicture => Database.Delete(battlePicture));
 
             string pictureFolder = $@"{AutoPigs.DataPath}{guild.Client.Name}\{guild.Name}\{category.Name}\";
@@ -182,6 +184,24 @@ namespace AutoPigs
             {
                 File.Delete(file);
             }
+        }
+
+        public async Task AddBattleReaction(string emoji, Category category) 
+        {
+            Database.Insert(new BattleReaction(emoji, category));
+        }
+
+        public async Task RemoveBattleReaction(string emoji, Category category, Guild guild) 
+        {
+            List<BattleReaction> emojis = GetBattleEmojis(category);
+            BattleReaction emojiToDelete = emojis.Find(e => e.Emoji == emoji);
+            if (emojiToDelete == null) 
+            {
+                throw new ArgumentException("string is not emoji");
+            }
+
+            Database.Delete(emojiToDelete);
+            
         }
 
         public Guild GetGuild(ChatGuild guild)
@@ -215,6 +235,10 @@ namespace AutoPigs
             Database.Insert(category);
             Database.Insert(new CategoryConfig(category));
 
+            if (guild.Client is IAddReaction && guild.Client.Name != "Vk")
+            {
+                Database.Insert(new BattleReaction("🐷", category));
+            }
             List<BattlePicture> pictures = new List<BattlePicture>();
             string defaultBattlePicturesPath = @$"{AutoPigs.DataPath}{guild.Client.Name}\DefaultBattlePictures";
 
@@ -237,6 +261,11 @@ namespace AutoPigs
         public List<BattlePicture> GetBattlePictures(Category category) 
         {
             return Database.Query<BattlePicture>($"SELECT * FROM BattlePicture WHERE CategoryId = {category.Id}").ToList();
+        }
+
+        public List<BattleReaction> GetBattleEmojis(Category category)
+        {
+            return Database.Query<BattleReaction>($"SELECT * FROM BattleReaction WHERE CategoryId = {category.Id}").ToList();
         }
 
 

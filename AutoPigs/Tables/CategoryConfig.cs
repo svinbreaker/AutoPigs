@@ -17,7 +17,6 @@ namespace AutoPigs
         [NotNull]
         public int PictureChance { get; set; }
 
-        public string ReactionEmoji { get; set; }
 
         public CategoryConfig() { }
 
@@ -26,7 +25,6 @@ namespace AutoPigs
             CategoryId = category.Id;
             ReactionChance = 100;
             PictureChance = 10;
-            ReactionEmoji = "🐷";
         }
     }
 }

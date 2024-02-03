@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AutoPigs.Tables
 {
-    public class BattleEmoji
+    public class BattleReaction
     {
         [PrimaryKey, AutoIncrement, NotNull]
         public int Id { get; set; }
@@ -19,9 +19,9 @@ namespace AutoPigs.Tables
         [NotNull]
         public string Emoji { get; set; }
 
-        public BattleEmoji() { }
+        public BattleReaction() { }
 
-        public BattleEmoji(string Emoji, Category category)
+        public BattleReaction(string Emoji, Category category)
         {
             this.CategoryId = category.Id;
             this.Emoji = Emoji;

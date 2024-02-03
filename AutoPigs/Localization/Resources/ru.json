@@ -54,6 +54,10 @@
   "COMMANDS_PIGS_CATEGORIES_LIST_DESCRIPTION": "Отобразить список категорий.",
   "COMMANDS_PIGS_CATEGORIES_LIST_SUCCESS": "Список категорий:",
   "COMMANDS_PIGS_CATEGORIES_LIST_EMPTY": "Категории не были созданы.",
+
+  "COMMANDS_CONFIGURATION_ADD_REACTION_DESCRIPTION": "Добавить боевую реакцию.",
+  "COMMANDS_CONFIGURATION_ADD_REACTION_ERROR_NOT_EMOJI": "Некорректное эмодзи.",
+  "COMMANDS_CONFIGURATION_ADD_REACTION_SUCCESS": "Реакция добавлена.",
   
   "COMMANDS_PIGS_ADD_BATTLE_PICTURE_DESCRIPTION": "Загрузить боевую картинку.",
   "COMMANDS_PIGS_ADD_BATTLE_PICTURE_SUCCESS": "Боевая картинка загружена.",
