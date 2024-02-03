@@ -29,13 +29,10 @@ namespace AutoPigs.Commands.Pigs.Categories
             {
                 if (Category == null)
                 {
-                    result = "COMMANDS_PIGS_CATEGORIES_ERROR_NOT_EXIST";
+                    Category = databaseHandler.GetDefaultCategory(guild);
                 }
-                else if (Category.Name == "Default")
-                {
-                    result = "COMMANDS_PIGS_CATEGORIES_ERROR_DEFAULT";
-                }
-                else if (context.Message.Files.Where(file => file is ChatPicture).ToList().Count == 0)
+
+                if (context.Message.Files.Where(file => file is ChatPicture).ToList().Count == 0)
                 {
                     result = "COMMANDS_PIGS_BATTLE_PICTURE_FAIL_NO_PICTURE";
                 }
@@ -52,7 +49,7 @@ namespace AutoPigs.Commands.Pigs.Categories
                     {
                         result = "COMMANDS_PIGS_ADD_BATTLE_PICTURE_MULTIPLE_SUCCESS";
                     }
-                    else 
+                    else
                     {
                         result = "COMMANDS_PIGS_ADD_BATTLE_PICTURE_SUCCESS";
                     }
