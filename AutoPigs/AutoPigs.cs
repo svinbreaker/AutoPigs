@@ -113,7 +113,7 @@ namespace AutoPigs
 
         private async Task OnDisconnect(BotDisconnectedEvent clientEvent)
         {
-            await Task.CompletedTask;
+            await clientEvent.Client.StartAsync();
         }
 
         private async Task OnMessageReceived(MessageReceivedEvent clientEvent)
@@ -190,7 +190,7 @@ namespace AutoPigs
                                 }
                                 else
                                 {
-                                    picture = pictures[random.Next(0, pictures.Count - 1)];
+                                    picture = pictures[random.Next(0, pictures.Count)];
                                 }
                                 List<string> files = new List<string>() { picture.FileLocation };
                                 await client.SendMessageAsync(message.Channel.Id, text: null, messageReferenceId: message.Id, files: files);
@@ -217,7 +217,7 @@ namespace AutoPigs
                                     }
                                     else 
                                     {
-                                        emoji = emojis[random.Next(0, emojis.Count - 1)];
+                                        emoji = emojis[random.Next(0, emojis.Count)];
                                     }
 
                                     try
