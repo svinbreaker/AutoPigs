@@ -34,9 +34,6 @@
   "COMMANDS_CONFIGURATION_LANGUAGE_DESCRIPTION": "Смена языка",
   "COMMANDS_CONFIGURATION_LANGUAGE_SUCCESS": "Язык установлен",
   "COMMANDS_CONFIGURATION_LANGUAGE_AVAILABLE_LANGUAGES": "Доступные языки: ",
-  "COMMANDS_CONFIGURATION_REACTION_CHANCE_DESCRIPTION": "Смена языка",
-  "COMMANDS_CONFIGURATION_REACTION_CHANCE_SUCCESS": "Язык установлен",
-  "COMMANDS_CONFIGURATION_REACTION_CHANCE_ERROR": "Число должно быть не меньше 0 и не больше 100",
   
   "COMMANDS_PIGS_CATEGORIES_ERROR_NOT_EXIST": "Категории с таким именем не существует.",
   "COMMANDS_PIGS_CATEGORIES_ERROR_DEFAULT": "Эту категорию нельзя изменить или удалить",
@@ -61,11 +58,17 @@
   "COMMANDS_CONFIGURATION_REMOVE_REACTION_DESCRIPTION": "Удалить боевую реакцию.",
   "COMMANDS_CONFIGURATION_REMOVE_REACTION_ERROR_NOT_EXIST": "Некорректное эмодзи.",
   "COMMANDS_CONFIGURATION_REMOVE_REACTION_SUCCESS": "Реакция удалена.",
+  "COMMANDS_CONFIGURATION_REACTION_CHANCE_DESCRIPTION": "Изменить вероятность боевой реакции",
+  "COMMANDS_CONFIGURATION_REACTION_CHANCE_SUCCESS": "Вероятность боевой реакции изменена.",
+  "COMMANDS_CONFIGURATION_REACTION_CHANCE_ERROR": "Число должно быть не меньше 0 и не больше 100",
   
   "COMMANDS_PIGS_ADD_BATTLE_PICTURE_DESCRIPTION": "Загрузить боевую картинку.",
   "COMMANDS_PIGS_ADD_BATTLE_PICTURE_SUCCESS": "Боевая картинка загружена.",
   "COMMANDS_PIGS_ADD_BATTLE_PICTURE_MULTIPLE_SUCCESS": "Боевые картинки загружены.",
   "COMMANDS_PIGS_BATTLE_PICTURE_FAIL_NO_PICTURE": "К команде необходимо прикрепить картинку",
   "COMMANDS_PIGS_CATEGORIES_CLEAR_BATTLE_PICTURES_DESCRIPTION": "Удалить боевые картинки",
-  "COMMANDS_PIGS_CATEGORIES_CLEAR_BATTLE_PICTURES_SUCCESS": "Боевые картинки удалены"
+  "COMMANDS_PIGS_CATEGORIES_CLEAR_BATTLE_PICTURES_SUCCESS": "Боевые картинки удалены",
+  "COMMANDS_CONFIGURATION_REACTION_PICTURE_DESCRIPTION": "Изменить вероятность боевой картинки",
+  "COMMANDS_CONFIGURATION_REACTION_PICTURE_SUCCESS": "Вероятность боевой картинки изменена.",
+  "COMMANDS_CONFIGURATION_REACTION_CHANCE_ERROR": "Число должно быть не меньше 0 и не больше 100",
 }
