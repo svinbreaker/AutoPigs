@@ -39,8 +39,10 @@ namespace AutoPigs.Commands.Configuration
             }
             else 
             {
-                databaseHandler.GetGuildConfig(guild).Language = SelectedLanguage;
-                result = localizer.GetLocalizedString(languageCode, "COMMANDS_CONFIGURATION_LANGUAGE_SUCCESS");
+                GuildConfig config = databaseHandler.GetGuildConfig(guild);
+                config.Language = SelectedLanguage;
+                databaseHandler.Database.Update(config);
+                result = localizer.GetLocalizedString(SelectedLanguage, "COMMANDS_CONFIGURATION_LANGUAGE_SUCCESS");
             }
            
             await client.SendMessageAsync(context.Channel.Id, result);

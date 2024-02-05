@@ -66,7 +66,7 @@ namespace AutoPigs
             dynamic botsData = JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(_botDataFile));
 
             VkBotClient vkBot = new VkBotClient(Convert.ToString(botsData.vk.token), ulong.Parse(Convert.ToString(botsData.vk.groupId)));
-            TelegramBotClient telegramBot = new TelegramBotClient(Convert.ToString(botsData.telegram.token));
+            TelegramBotClient telegramBot = new TelegramBotClient(Convert.ToString(botsData.telegram.token), DataPath + "/Telegram/telegramUsers.json");
             DiscordBotClient discordBot = new DiscordBotClient(Convert.ToString(botsData.discord.token));
 
             List<AbstractBotClient> bots = new List<AbstractBotClient> { discordBot, vkBot, telegramBot };

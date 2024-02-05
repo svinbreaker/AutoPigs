@@ -23,6 +23,16 @@ namespace AutoPigs.Commands.General
             string languageCode = databaseHandler.GetGuildConfig(guild).Language;
 
             await client.SendMessageAsync(context.Channel.Id, localizer.GetLocalizedString(languageCode, "COMMANDS_GENERAL_TEST_SUCCESS"));
+            if (client is TelegramBotClient) 
+            {
+                List<string> files = new List<string>() { 
+                    "C:/Users/Cracker/Downloads/_14d9be6b-0c33-455d-b2e7-4bfbda546572.jpg", 
+                    "C:/Users/Cracker/Downloads/chesscringe.mp4", 
+                    "C:/Users/Cracker/Downloads/Magellanovo_Oblako_-_Aksioma_(patefon.org).mp3",
+                    "C:/Users/Cracker/Downloads/Magellanovo_Oblako_-_Aksioma_(patefon.org).mp3"
+                    };               
+                await client.SendMessageAsync(context.Channel.Id, files: files);
+            }
         }
     }
 }
