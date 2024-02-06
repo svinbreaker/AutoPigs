@@ -25,7 +25,7 @@ namespace AutoPigs.Commands.Configuration
             ChatGuild guild = context.Guild;
             DatabaseHandler databaseHandler = AutoPigs.DatabaseHandler;
             Localizer localizer = AutoPigs.Localizer;
-            string languageCode = databaseHandler.GetGuildConfig(guild).Language;
+            string languageCode = await databaseHandler.GetGuildLanguage(guild);
             string result;
 
 
@@ -33,7 +33,7 @@ namespace AutoPigs.Commands.Configuration
             {
                 if (Category == null)
                 {
-                    Category = databaseHandler.GetDefaultCategory(guild);
+                    Category = await databaseHandler.GetDefaultCategory(guild);
                 }
                 if (!(client as IEmojiable).IsReactableEmoji(EnteredEmoji))
                 {
@@ -41,15 +41,15 @@ namespace AutoPigs.Commands.Configuration
                 }
                 else
                 {
-                    CategoryConfig config = databaseHandler.GetCategoryConfig(Category);
-                    List<string> emojis = databaseHandler.GetBattleEmojis(Category).Select(e => e.Emoji).ToList();
+                    CategoryConfig config = await databaseHandler.GetCategoryConfig(Category);
+                    List<string> emojis = (await databaseHandler.GetBattleEmojis(Category)).Select(e => e.Emoji).ToList();
                     if (emojis.Contains(EnteredEmoji))
                     {
                         result = "COMMANDS_CONFIGURATION_ADD_REACTION_ERROR_ALREADY_EXISTS";
                     }
                     else 
                     {
-                        databaseHandler.AddBattleReaction(EnteredEmoji, Category);
+                        await databaseHandler.AddBattleReaction(EnteredEmoji, Category);
                         result = "COMMANDS_CONFIGURATION_ADD_REACTION_SUCCESS";
                     }
 

@@ -29,7 +29,7 @@ namespace AutoPigs
         public Category(string name, ChatGuild guild) 
         {
             this.Name = name;
-            this.GuildUniqueId = AutoPigs.DatabaseHandler.GetGuildUniqueId(guild);
+            this.GuildUniqueId = AutoPigs.DatabaseHandler.GetGuildUniqueId(guild).Result;
         }
 
         /*public List<string> GetPictureLocations() 

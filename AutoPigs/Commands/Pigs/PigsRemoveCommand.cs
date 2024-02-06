@@ -31,7 +31,7 @@ namespace AutoPigs.Commands.Pigs
             {
                 DatabaseHandler databaseHandler = AutoPigs.DatabaseHandler;
                 localizer = AutoPigs.Localizer;
-                languageCode = databaseHandler.GetGuildConfig(guild).Language;
+                languageCode = await databaseHandler.GetGuildLanguage(guild);
 
                 if (Target == null)
                 {
@@ -45,11 +45,11 @@ namespace AutoPigs.Commands.Pigs
                 {
                     result = "COMMANDS_ERROR_NOT_ENOUGH_RIGHTS";
                 }
-                else if (databaseHandler.UserIsPig(sender, guild))
+                else if (await databaseHandler.UserIsPig(sender, guild))
                 {
                     result = "COMMANDS_PIGS_REMOVE_SENDER_IS_PIG";
                 }
-                else if (!databaseHandler.UserIsPig(Target, guild))
+                else if (!(await databaseHandler.UserIsPig(Target, guild)))
                 {
                     result = "COMMANDS_PIGS_TARGET_IS_NOT_PIG";
                 }
@@ -59,7 +59,7 @@ namespace AutoPigs.Commands.Pigs
                 }
                 else
                 {
-                    databaseHandler.RemovePig(databaseHandler.GetUserAsPig(Target, guild));
+                    await databaseHandler.RemovePig(await databaseHandler.GetUserAsPig(Target, guild));
                     result = "COMMANDS_PIGS_REMOVE_SUCCESS";
                     success = true;
                 }

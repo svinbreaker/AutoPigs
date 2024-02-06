@@ -23,7 +23,7 @@ namespace AutoPigs.Commands.Configuration
             ChatGuild guild = context.Guild;
             DatabaseHandler databaseHandler = AutoPigs.DatabaseHandler;
             Localizer localizer = AutoPigs.Localizer;
-            string languageCode = databaseHandler.GetGuildConfig(guild).Language;
+            string languageCode = await databaseHandler.GetGuildLanguage(guild);
             string result;
 
             try
@@ -40,11 +40,11 @@ namespace AutoPigs.Commands.Configuration
                 {
                     if (Category == null)
                     {
-                        Category = databaseHandler.GetDefaultCategory(guild);
+                        Category = await databaseHandler.GetDefaultCategory(guild);
                     }
-                    CategoryConfig config = databaseHandler.GetCategoryConfig(Category);
+                    CategoryConfig config = await databaseHandler.GetCategoryConfig(Category);
                     config.ReactionChance = Chance.Value;
-                    databaseHandler.Database.Update(config);
+                    await databaseHandler.Database.UpdateAsync(config);
 
                     result = "COMMANDS_CONFIGURATION_REACTION_CHANCE_SUCCESS";
                 }

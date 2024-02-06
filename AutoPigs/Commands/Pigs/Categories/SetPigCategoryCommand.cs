@@ -33,7 +33,7 @@ namespace AutoPigs.Commands.Pigs.Categories
             {
                 DatabaseHandler databaseHandler = AutoPigs.DatabaseHandler;
                 localizer = AutoPigs.Localizer;
-                languageCode = databaseHandler.GetGuildConfig(guild).Language;
+                languageCode = await databaseHandler.GetGuildLanguage(guild);
 
 
                 if (Target == null)
@@ -48,11 +48,11 @@ namespace AutoPigs.Commands.Pigs.Categories
                 {
                     result = "COMMANDS_ERROR_NOT_ENOUGH_RIGHTS";
                 }
-                else if (databaseHandler.UserIsPig(sender, guild))
+                else if (await databaseHandler.UserIsPig(sender, guild))
                 {
                     result = "COMMANDS_PIGS_ADD_FAIL_SENDER_IS_PIG";
                 }
-                else if (!(databaseHandler.UserIsPig(Target, guild)))
+                else if (!(await databaseHandler.UserIsPig(Target, guild)))
                 {
                     result = "COMMANDS_PIGS_REMOVE_FAIL_TARGET_IS_NOT_PIG";
                 }
@@ -64,13 +64,13 @@ namespace AutoPigs.Commands.Pigs.Categories
                 {
                     result = "COMMANDS_PIGS_CATEGORIES_ERROR_NOT_EXIST";
                 }
-                else if (databaseHandler.PigHasCategory(databaseHandler.GetUserAsPig(Target, guild), Category))
+                else if (await databaseHandler.PigHasCategory(await databaseHandler.GetUserAsPig(Target, guild), Category))
                 {
                     result = "COMMANDS_PIGS_CATEGORIES_SET_PIG_CATEGORY_ERROR_ALREADY_SETTED";
                 }
                 else
                 {
-                    databaseHandler.SetPigCategory(databaseHandler.GetUserAsPig(Target, guild), Category);
+                    await databaseHandler.SetPigCategory(await databaseHandler.GetUserAsPig(Target, guild), Category);
                     result = "COMMANDS_PIGS_CATEGORIES_SET_PIG_CATEGORY_SUCCESS";
                     success = true;
                 }
@@ -87,7 +87,7 @@ namespace AutoPigs.Commands.Pigs.Categories
                 result += $" {Category.Name}";
             }
 
-            await client.SendMessageAsync(context.Channel.Id, result);
+            await client.SendMessageAsync(context.Channel.Id, text: result);
         }
     }
 }

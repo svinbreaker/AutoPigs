@@ -17,7 +17,7 @@ namespace AutoPigs.Commands.ArgumentParsers
             Category category = null;
             if (context != null)
             {
-                category = AutoPigs.DatabaseHandler.GetGuildCategories(context.Guild).FirstOrDefault(c => c.Name == value);
+                category = AutoPigs.DatabaseHandler.GetGuildCategories(context.Guild).Result.FirstOrDefault(c => c.Name == value);
             }
 
             return category;

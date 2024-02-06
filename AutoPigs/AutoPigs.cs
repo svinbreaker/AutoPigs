@@ -78,7 +78,7 @@ namespace AutoPigs
                 new AddBattlePictureCommand(), new ClearBattlePicturesCommand(),
                 new SetPictureChanceCommand(),
                 new CreateCategoryCommand(), new DeleteCategoryCommand(), new CategoriesListCommand(),
-                new SetPigCategoryCommand(), new RemovePigCategory(),             
+                new SetPigCategoryCommand(), new RemovePigCategory(),
             };
             List<AbstractCommand> emojiCommands = new List<AbstractCommand> { new AddReactionCommand(), new RemoveReactionCommand(), new SetReactionChanceCommand() };
 
@@ -123,20 +123,19 @@ namespace AutoPigs
             AbstractBotClient client = message.Client;
 
             ChatGuild guild = message.Guild;
-            await Task.Run(() =>
+
+            if (!(await DatabaseHandler.GuildConfigExists(guild)))
             {
-                if (!DatabaseHandler.GuildConfigExists(guild))
+                try
                 {
-                    try
-                    {
-                        DatabaseHandler.CreateGuildConfig(guild);
-                    }
-                    catch (Exception exception)
-                    {
-                        Console.WriteLine(exception.ToString());
-                    }
+                    await DatabaseHandler.CreateGuildConfig(guild);
                 }
-            });
+                catch (Exception exception)
+                {
+                    Console.WriteLine(exception.ToString());
+                }
+            }
+
             await CheckPigs(message);
 
             await client.TextCommandProcessor.ProcessCommand(message.Text, message.GetAsCommandContext());
@@ -153,12 +152,12 @@ namespace AutoPigs
             AbstractBotClient client = message.Client;
             ChatUser author = message.Author;
 
-            if (DatabaseHandler.UserIsPig(author, guild))
+            if (await DatabaseHandler.UserIsPig(author, guild))
             {
-                Pig pig = DatabaseHandler.GetUserAsPig(author, guild);
-                GuildConfig config = DatabaseHandler.GetGuildConfig(guild);
+                Pig pig = await DatabaseHandler.GetUserAsPig(author, guild);
+                GuildConfig config = await DatabaseHandler.GetGuildConfig(guild);
 
-                List<Category> categories = DatabaseHandler.GetCategoriesOfPig(pig);
+                List<Category> categories = await DatabaseHandler.GetCategoriesOfPig(pig);
                 Category category = null;
                 Random random = new Random();
 
@@ -175,13 +174,13 @@ namespace AutoPigs
 
 
                     BattlePicture picture;
-                    CategoryConfig categoryConfig = DatabaseHandler.GetCategoryConfig(category);
+                    CategoryConfig categoryConfig = await DatabaseHandler.GetCategoryConfig(category);
                     int battlePictureChance = categoryConfig.PictureChance;
                     if (battlePictureChance > 0)
                     {
                         if (random.Next(100) <= battlePictureChance)
                         {
-                            List<BattlePicture> pictures = DatabaseHandler.GetBattlePictures(category);
+                            List<BattlePicture> pictures = await DatabaseHandler.GetBattlePictures(category);
                             if (pictures.Count > 0)
                             {
                                 if (pictures.Count == 1)
@@ -202,8 +201,8 @@ namespace AutoPigs
                     {
                         foreach (Category c in categories)
                         {
-                            CategoryConfig cConfig = DatabaseHandler.GetCategoryConfig(c);
-                            List<string> emojis = DatabaseHandler.GetBattleEmojis(category).Select(e => e.Emoji).ToList();
+                            CategoryConfig cConfig = await DatabaseHandler.GetCategoryConfig(c);
+                            List<string> emojis = (await DatabaseHandler.GetBattleEmojis(category)).Select(e => e.Emoji).ToList();
                             int reactionChance = cConfig.ReactionChance;
 
                             if (emojis != null && reactionChance > 0)
@@ -211,11 +210,11 @@ namespace AutoPigs
                                 if (random.Next(100) <= reactionChance)
                                 {
                                     string emoji;
-                                    if (emojis.Count == 1) 
+                                    if (emojis.Count == 1)
                                     {
                                         emoji = emojis[0];
                                     }
-                                    else 
+                                    else
                                     {
                                         emoji = emojis[random.Next(0, emojis.Count)];
                                     }

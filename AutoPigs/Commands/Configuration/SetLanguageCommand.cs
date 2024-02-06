@@ -21,7 +21,7 @@ namespace AutoPigs.Commands.Configuration
             ChatGuild guild = context.Guild;
             DatabaseHandler databaseHandler = AutoPigs.DatabaseHandler;
             Localizer localizer = AutoPigs.Localizer;
-            string languageCode = databaseHandler.GetGuildConfig(guild).Language;
+            string languageCode = await databaseHandler.GetGuildLanguage(guild);
             string result;
 
             List<string> languages = localizer.GetLanguages();
@@ -39,9 +39,9 @@ namespace AutoPigs.Commands.Configuration
             }
             else 
             {
-                GuildConfig config = databaseHandler.GetGuildConfig(guild);
+                GuildConfig config = await databaseHandler.GetGuildConfig(guild);
                 config.Language = SelectedLanguage;
-                databaseHandler.Database.Update(config);
+                await databaseHandler.Database.UpdateAsync(config);
                 result = localizer.GetLocalizedString(SelectedLanguage, "COMMANDS_CONFIGURATION_LANGUAGE_SUCCESS");
             }
            

@@ -23,13 +23,13 @@ namespace AutoPigs.Commands.Pigs.Categories
             DatabaseHandler databaseHandler = AutoPigs.DatabaseHandler;
             Localizer localizer = AutoPigs.Localizer;
             ChatGuild guild = context.Guild;
-            string languageCode = databaseHandler.GetGuildConfig(guild).Language;
+            string languageCode = await databaseHandler.GetGuildLanguage(guild);
 
             try
             {
                 if (Category == null)
                 {
-                    Category = databaseHandler.GetDefaultCategory(guild);
+                    Category = await databaseHandler.GetDefaultCategory(guild);
                 }
 
                 if (context.Message.Files.Where(file => file is ChatPicture).ToList().Count == 0)

@@ -34,7 +34,7 @@ namespace AutoPigs.Commands.Pigs
             {
                 DatabaseHandler databaseHandler = AutoPigs.DatabaseHandler;
                 localizer = AutoPigs.Localizer;
-                languageCode = databaseHandler.GetGuildConfig(guild).Language;
+                languageCode = await databaseHandler.GetGuildLanguage(guild);
 
 
                 if (Target == null)
@@ -49,11 +49,11 @@ namespace AutoPigs.Commands.Pigs
                 {
                     result = "COMMANDS_ERROR_NOT_ENOUGH_RIGHTS";
                 }
-                else if (databaseHandler.UserIsPig(sender, guild))
+                else if (await databaseHandler.UserIsPig(sender, guild))
                 {
                     result = "COMMANDS_PIGS_ADD_FAIL_SENDER_IS_PIG";
                 }
-                else if (databaseHandler.UserIsPig(Target, guild))
+                else if (await databaseHandler.UserIsPig(Target, guild))
                 {
                     result = "COMMANDS_PIGS_ADD_FAIL_TARGET_IS_PIG";
                 }
@@ -65,12 +65,12 @@ namespace AutoPigs.Commands.Pigs
                 {
                     if (Category == null) 
                     {
-                        Category = databaseHandler.GetDefaultCategory(guild);
+                        Category = await databaseHandler.GetDefaultCategory(guild);
                     }
 
                     Pig pig = new Pig(Target, guild);
-                    databaseHandler.AddPig(pig);
-                    databaseHandler.SetPigCategory(pig, Category);
+                    await databaseHandler.AddPig(pig);
+                    await databaseHandler.SetPigCategory(pig, Category);
                     result = "COMMANDS_PIGS_ADD_SUCCESS";
                     success = true;
                 }

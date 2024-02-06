@@ -7,7 +7,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Folder Include="Data\Telegram\" />
 		<Folder Include="Entities\" />
 		<Folder Include="Localization\" />
 		<Folder Include="Data\" />

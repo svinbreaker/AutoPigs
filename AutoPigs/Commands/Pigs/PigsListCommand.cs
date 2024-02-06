@@ -27,9 +27,9 @@ namespace AutoPigs.Commands.Pigs
             {
                 DatabaseHandler databaseHandler = AutoPigs.DatabaseHandler;
                 localizer = AutoPigs.Localizer;
-                languageCode = databaseHandler.GetGuildConfig(guild).Language;
+                languageCode = await databaseHandler.GetGuildLanguage(guild);
 
-                List<Pig> pigs = databaseHandler.GetPigs(guild.Id, client.Name);
+                List<Pig> pigs = await databaseHandler.GetPigs(guild.Id, client.Name);
                 if (pigs.Count == 0)
                 {
                     result = localizer.GetLocalizedString(languageCode, "COMMANDS_PIGS_LIST_EMPTY");
@@ -42,7 +42,7 @@ namespace AutoPigs.Commands.Pigs
                     {
                         builder.Append(client.Mention(pig.UserId)).Append("");                   
                         builder.Append(" (");
-                        List<Category> categories = databaseHandler.GetCategoriesOfPig(pig);
+                        List<Category> categories = await databaseHandler.GetCategoriesOfPig(pig);
                         foreach(Category category in categories) 
                         {
                             builder.Append($"{category.Name}, ");

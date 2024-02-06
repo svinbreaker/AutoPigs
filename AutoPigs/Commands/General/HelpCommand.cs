@@ -33,7 +33,7 @@ namespace AutoPigs.Commands.General
             {
                 DatabaseHandler databaseHandler = AutoPigs.DatabaseHandler;
                 localizer = AutoPigs.Localizer;
-                languageCode = databaseHandler.GetGuildConfig(guild).Language;
+                languageCode = await databaseHandler.GetGuildLanguage(guild);
 
                 string prefix = client.TextCommandProcessor.Prefix;
                 StringBuilder builder = new StringBuilder();

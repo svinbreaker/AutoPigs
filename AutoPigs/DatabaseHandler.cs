@@ -9,15 +9,16 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using СrossAppBot;
-using СrossAppBot;
 using СrossAppBot.Entities;
 using СrossAppBot.Entities.Files;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using static System.Runtime.InteropServices.Marshalling.IIUnknownCacheStrategy;
 
 namespace AutoPigs
 {
     class DatabaseHandler
     {
-        public SQLiteConnection Database { get; set; }
+        public SQLiteAsyncConnection Database { get; set; }
         private string FilePath;
 
 
@@ -27,293 +28,340 @@ namespace AutoPigs
             ConnectToDatabase();
         }
 
+        public async Task ShowAllTableDataAsync()
+        {
+            // Get a list of tables in the database
+            var tables = await Database.QueryAsync<TableInfo>("SELECT name FROM sqlite_master WHERE type='table';");
+
+            // Iterate over each table and display its data
+            foreach (var table in tables)
+            {
+                Console.WriteLine($"Table: {table}");
+
+                // Query all data from the current table
+                var data = await Database.Table<object>().ToListAsync(); // Replace 'object' with your table model class
+
+                // Print or display the data
+                foreach (var item in data)
+                {
+                    // Assuming each item has properties that you want to display
+                    // Modify this part according to your table structure
+                    Console.WriteLine(item.ToString());
+                }
+            }
+        }
+
         public void ConnectToDatabase()
         {
-            //Создание базы данных и таблиц при их отсутствии
-            //System.IO.File.Delete(FilePath);
             if (!System.IO.File.Exists(FilePath))
             {
-                Database = new SQLite.SQLiteConnection(FilePath, SQLiteOpenFlags.Create | SQLiteOpenFlags.FullMutex | SQLiteOpenFlags.ReadWrite);
-                Database.CreateTable<Pig>();
-                Database.CreateTable<Guild>();
-                Database.CreateTable<GuildConfig>();
-                Database.CreateTable<BattlePicture>();
-                Database.CreateTable<BattleReaction>();
-                Database.CreateTable<Category>();
-                Database.CreateTable<CategoryConfig>();
-                Database.CreateTable<PigsCategories>();
-                Database.Close();
+                var connection = new SQLite.SQLiteConnection(FilePath, SQLiteOpenFlags.Create | SQLiteOpenFlags.FullMutex | SQLiteOpenFlags.ReadWrite);
+                connection.CreateTable<Pig>();
+                connection.CreateTable<Guild>();
+                connection.CreateTable<GuildConfig>();
+                connection.CreateTable<BattlePicture>();
+                connection.CreateTable<BattleReaction>();
+                connection.CreateTable<Category>();
+                connection.CreateTable<CategoryConfig>();
+                connection.CreateTable<PigsCategories>();
+                connection.Close();
             }
-            //Подключение к базе данных
-            Database = new SQLite.SQLiteConnection(FilePath);
-
+            Database = new SQLite.SQLiteAsyncConnection(FilePath);
         }
 
-        public bool UserIsPig(ChatUser user, ChatGuild guild)
+        public async Task<bool> UserIsPig(ChatUser user, ChatGuild guild)
         {
-            return Database.Query<Pig>($"SELECT * FROM Pig WHERE UserId = '{user.Id}' AND ClientName = '{user.Client.Name}' AND GuildId = '{guild.Id}'").Count > 0;
+            return (await Database.QueryAsync<Pig>($"SELECT * FROM Pig WHERE UserId = '{user.Id}' AND ClientName = '{user.Client.Name}' AND GuildId = '{guild.Id}'")).Count > 0;
         }
 
-        public void AddPig(string userId, string clientName, string guildId)
+        public async Task AddPig(string userId, string clientName, string guildId)
         {
             Pig pig = new Pig(userId, clientName, guildId);
-            Database.Insert(pig);
+            await Database.InsertAsync(pig);
         }
 
-        public void AddPig(Pig pig)
+        public async Task AddPig(Pig pig)
         {
-            Database.Insert(pig);
+            await Database.InsertAsync(pig);
         }
 
-        public void RemovePig(Pig pig)
+        public async Task RemovePig(Pig pig)
         {
-            Database.Delete(pig);
+            await Database.DeleteAsync(pig);
         }
 
-        public Pig GetUserAsPig(ChatUser user, ChatGuild guild)
+        public async Task<Pig> GetUserAsPig(ChatUser user, ChatGuild guild)
         {
-            return Database.Query<Pig>($"SELECT * FROM Pig WHERE UserId = '{user.Id}' AND ClientName = '{user.Client.Name}' AND GuildId = '{guild.Id}'").FirstOrDefault();
+            return (await Database.QueryAsync<Pig>($"SELECT * FROM Pig WHERE UserId = '{user.Id}' AND ClientName = '{user.Client.Name}' AND GuildId = '{guild.Id}'")).FirstOrDefault();
         }
 
-        public List<Pig> GetPigs(string guildId, string clientName)
+        public async Task<List<Pig>> GetPigs(string guildId, string clientName)
         {
-            return Database.Query<Pig>($"SELECT * FROM Pig WHERE GuildId = '{guildId}' AND ClientName = '{clientName}'").ToList();
+            return (await Database.QueryAsync<Pig>($"SELECT * FROM Pig WHERE GuildId = '{guildId}' AND ClientName = '{clientName}'")).ToList();
         }
 
-        public void CreateGuildConfig(ChatGuild guild)
+        public async Task CreateGuildConfig(ChatGuild guild)
         {
             Guild guildObject = new Guild(guild);
-            GuildConfig config = new GuildConfig(guildObject);
-            Database.Insert(guildObject);
-            Database.Insert(config);
+            try
+            {
+                await Database.RunInTransactionAsync(async (database) =>
+                {
+                    await Database.InsertAsync(guildObject);
+                    GuildConfig config = new GuildConfig(guildObject);
+                    await Database.InsertAsync(config);
+                });
+            }
+            catch (Exception ex)
+            {
 
-            AddDefaultCategory(guild);
+                Console.WriteLine($"Exception occurred while creating guild config: {ex.Message}");
+            }
+            finally
+            {
+                await AddDefaultCategory(guild);
+            }
         }
 
-        public bool GuildConfigExists(ChatGuild guild)
+        public async Task<bool> GuildConfigExists(ChatGuild guild)
         {
-            return Database.Query<Pig>($"SELECT * FROM Guild WHERE Id = '{guild.Id}' AND ClientName = '{guild.Client.Name}'").Count > 0;
+            return (await Database.QueryAsync<Pig>($"SELECT * FROM Guild WHERE Id = '{guild.Id}' AND ClientName = '{guild.Client.Name}'")).Count > 0;
         }
 
-        public GuildConfig GetGuildConfig(ChatGuild guild)
-        {   
-            return Database.Query<GuildConfig>($"SELECT * FROM GuildConfig WHERE GuildUniqueId = '{GetGuildUniqueId(guild)}'").FirstOrDefault();
-        }
-
-        public List<Category> GetGuildCategories(ChatGuild guild)
+        public async Task<string> GetGuildLanguage(ChatGuild guild)
         {
-            return Database.Query<Category>($"SELECT * FROM Category WHERE GuildUniqueId = '{GetGuildUniqueId(guild)}'");
+            return (await GetGuildConfig(guild)).Language;
         }
 
-        public void AddGuildCategory(string categoryName, ChatGuild guild)
+        public async Task<GuildConfig> GetGuildConfig(ChatGuild guild)
+        {
+            return (await Database.QueryAsync<GuildConfig>($"SELECT * FROM GuildConfig WHERE GuildUniqueId = '{await GetGuildUniqueId(guild)}'")).FirstOrDefault();
+        }
+
+        public async Task<List<Category>> GetGuildCategories(ChatGuild guild)
+        {
+            return await Database.QueryAsync<Category>($"SELECT * FROM Category WHERE GuildUniqueId = '{await GetGuildUniqueId(guild)}'");
+        }
+
+        public async Task AddGuildCategory(string categoryName, ChatGuild guild)
         {
             Category category = new Category(categoryName, guild);
-            Database.Insert(category);
-            CategoryConfig config = new CategoryConfig(category);       
-            Database.Insert(config);
-        }
-
-        public void RemoveGuildCategory(Category category)
-        {
-            Database.Delete(GetCategoryConfig(category));
-            foreach(Pig pig in GetPigsOfCategory(category)) 
+            try
             {
-                RemovePigCategory(pig, category);
+                await Database.RunInTransactionAsync(async (database) =>
+                {
+                    await Database.InsertAsync(category);
+                    CategoryConfig config = new CategoryConfig(category);
+                    await Database.InsertAsync(config);
+                });
             }
-            Database.Delete(category);         
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception occurred while creating category: {ex.Message}");
+            }
+
         }
 
-        public void SetPigCategory(Pig pig, Category category)
+        public async Task RemoveGuildCategory(Category category)
         {
-            Database.Insert(new PigsCategories(pig.Id, category.Id));
+            try
+            {
+                await Database.RunInTransactionAsync(async (database) =>
+                {
+                    await Database.DeleteAsync(GetCategoryConfig(category));
+                    foreach (Pig pig in await GetPigsOfCategory(category))
+                    {
+                        await RemovePigCategory(pig, category);
+                    }
+
+                    foreach (BattlePicture picture in await GetBattlePictures(category))
+                    {
+                        await RemoveBattlePicture(picture);
+                    }
+
+                    foreach (BattleReaction reaction in await GetBattleEmojis(category))
+                    {
+                        await RemoveBattleReaction(reaction.Emoji, category);
+                    }
+
+                    await Database.DeleteAsync(category);
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception occurred while removing guild category: {ex.Message}");
+            }
         }
 
-        public void RemovePigCategory(Pig pig, Category category)
+        public async Task SetPigCategory(Pig pig, Category category)
         {
-            PigsCategories pigCategory = Database.Query<PigsCategories>($"SELECT * FROM PigsCategories WHERE PigId = {pig.Id} AND CategoryId = {category.Id}").FirstOrDefault();
-            Database.Delete(pigCategory);
+            await Database.InsertAsync(new PigsCategories(pig.Id, category.Id));
         }
 
-        public bool PigHasCategory(Pig pig, Category category) 
+        public async Task RemovePigCategory(Pig pig, Category category)
         {
-            return Database.Query<PigsCategories>($"SELECT * FROM PigsCategories WHERE PigId = {pig.Id} AND CategoryId = {category.Id}").ToList().Count > 0;
+            PigsCategories pigCategory = (await Database.QueryAsync<PigsCategories>($"SELECT * FROM PigsCategories WHERE PigId = {pig.Id} AND CategoryId = {category.Id}")).FirstOrDefault();
+            await Database.DeleteAsync(pigCategory);
         }
 
-        public List<Pig> GetPigsOfCategory(Category category) 
+        public async Task<bool> PigHasCategory(Pig pig, Category category)
         {
-            return Database.Query<Pig>($"SELECT * FROM PIG JOIN PigsCategories ON Pig.Id = PigsCategories.PigId WHERE PigsCategories.CategoryId = '{category.Id}'");
+            return (await Database.QueryAsync<PigsCategories>($"SELECT * FROM PigsCategories WHERE PigId = {pig.Id} AND CategoryId = {category.Id}")).ToList().Count > 0;
         }
 
-        public List<Category> GetCategoriesOfPig(Pig pig)
+        public async Task<List<Pig>> GetPigsOfCategory(Category category)
         {
-            return Database.Query<Category>($"SELECT * FROM Category JOIN PigsCategories ON Category.Id = PigsCategories.CategoryId WHERE PigsCategories.PigId = {pig.Id}").ToList();
+            return await Database.QueryAsync<Pig>($"SELECT * FROM PIG JOIN PigsCategories ON Pig.Id = PigsCategories.PigId WHERE PigsCategories.CategoryId = '{category.Id}'");
+        }
+
+        public async Task<List<Category>> GetCategoriesOfPig(Pig pig)
+        {
+            return await Database.QueryAsync<Category>($"SELECT * FROM Category JOIN PigsCategories ON Category.Id = PigsCategories.CategoryId WHERE PigsCategories.PigId = {pig.Id}");
         }
 
         public async Task AddBattlePicture(ChatPicture picture, Category category, ChatGuild guild)
         {
             string pictureLocation = null;
-            using (HttpClient client = new HttpClient())
+            try
             {
-                string pictureFolder = $@"{AutoPigs.DataPath}{guild.Client.Name}\{guild.Name}\{category.Name}\";
-                if (!Directory.Exists(pictureFolder))
+                using (HttpClient client = new HttpClient())
                 {
-                    Directory.CreateDirectory(pictureFolder);
+                    string pictureFolder = $@"{AutoPigs.DataPath}{guild.Client.Name}\{guild.Name}\{category.Name}\";
+                    if (!Directory.Exists(pictureFolder))
+                    {
+                        Directory.CreateDirectory(pictureFolder);
+                    }
+                    string pictureName = Directory.GetFiles(pictureFolder, ".png", SearchOption.TopDirectoryOnly).Length.ToString();
+
+                    pictureLocation = pictureFolder + pictureName + ".png";
+                    byte[] imageData = await client.GetByteArrayAsync(picture.Url);
+
+                    File.WriteAllBytes(pictureLocation, imageData);
                 }
-                string pictureName = Directory.GetFiles(pictureFolder, ".png", SearchOption.TopDirectoryOnly).Length.ToString();
 
-                pictureLocation = pictureFolder + pictureName + ".png";
-                byte[] imageData = await client.GetByteArrayAsync(picture.Url);
-               
-                File.WriteAllBytes(pictureLocation, imageData);
+                await Database.InsertAsync(new BattlePicture(pictureLocation, category));
             }
-
-            Database.Insert(new BattlePicture(pictureLocation, category));
-        }
-
-        public void ClearBattlePictures(Category category, ChatGuild guild)
-        {
-            List<BattlePicture> battlePictures = GetBattlePictures(category);
-            battlePictures.ForEach(battlePicture => Database.Delete(battlePicture));
-
-            string pictureFolder = $@"{AutoPigs.DataPath}{guild.Client.Name}\{guild.Name}\{category.Name}\";
-            if (!Directory.Exists(pictureFolder))
+            catch (Exception exception)
             {
-                Directory.CreateDirectory(pictureFolder);
+                Console.WriteLine($"Exception occurred while adding battle picture: {exception.Message}");
             }
-            foreach(string file in Directory.GetFiles(pictureFolder, "*")) 
+        }
+
+        public async Task RemoveBattlePicture(BattlePicture picture)
+        {
+            await Task.Run(() => File.Delete(picture.FileLocation));
+            await Database.DeleteAsync(picture);
+        }
+
+        public async Task ClearBattlePictures(Category category)
+        {
+            List<BattlePicture> pictures = await GetBattlePictures(category);
+
+            try
             {
-                File.Delete(file);
+                foreach (BattlePicture picture in pictures)
+                {
+                    await RemoveBattlePicture(picture);
+                }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception occurred while clearing battle pictures: {ex.Message}");
+            }
+
         }
 
-        public async Task AddBattleReaction(string emoji, Category category) 
+        public async Task AddBattleReaction(string emoji, Category category)
         {
-            Database.Insert(new BattleReaction(emoji, category));
+            await Database.InsertAsync(new BattleReaction(emoji, category));
         }
 
-        public async Task RemoveBattleReaction(string emoji, Category category) 
+        public async Task RemoveBattleReaction(string emoji, Category category)
         {
-            List<BattleReaction> emojis = GetBattleEmojis(category);
+            List<BattleReaction> emojis = await GetBattleEmojis(category);
             BattleReaction emojiToDelete = emojis.Find(e => e.Emoji == emoji);
-            if (emojiToDelete == null) 
+            if (emojiToDelete == null)
             {
-                throw new ArgumentException("string is not emoji");
+                throw new ArgumentException("Entered string is not emoji");
             }
 
-            Database.Delete(emojiToDelete);
-            
+            await Database.DeleteAsync(emojiToDelete);
+
         }
 
-        public Guild GetGuild(ChatGuild guild)
+        public async Task<Guild> GetGuild(ChatGuild guild)
         {
-            return Database.Query<Guild>($"SELECT * FROM Guild WHERE Id = '{guild.Id}' AND ClientName = '{guild.Client.Name}'").FirstOrDefault();
+            return (await Database.QueryAsync<Guild>($"SELECT * FROM Guild WHERE Id = '{guild.Id}' AND ClientName = '{guild.Client.Name}'")).FirstOrDefault();
         }
 
-        public Guild GetGuild(string uniqueId)
+        public async Task<Guild> GetGuild(string uniqueId)
         {
-            return Database.Query<Guild>($"SELECT * FROM Guild WHERE UniqueId = '{uniqueId}'").FirstOrDefault();
+            return (await Database.QueryAsync<Guild>($"SELECT * FROM Guild WHERE UniqueId = '{uniqueId}'")).FirstOrDefault();
         }
 
-        public string GetGuildUniqueId(ChatGuild guild)
+        public async Task<string> GetGuildUniqueId(ChatGuild guild)
         {
-            return Database.Query<Guild>($"SELECT * FROM Guild WHERE Id = '{guild.Id}' AND ClientName = '{guild.Client.Name}'").FirstOrDefault().UniqueId;
+            return (await Database.QueryAsync<Guild>($"SELECT * FROM Guild WHERE Id = '{guild.Id}' AND ClientName = '{guild.Client.Name}'")).FirstOrDefault().UniqueId;
         }
 
-        public Category GetGuildCategory(string name, ChatGuild guild)
+        public async Task<Category> GetGuildCategory(string name, ChatGuild guild)
         {
-            return Database.Query<Category>($"SELECT * FROM Category WHERE GuildUniqueId = '{GetGuildUniqueId(guild)}'").FirstOrDefault();
+            return (await Database.QueryAsync<Category>($"SELECT * FROM Category WHERE GuildUniqueId = '{await GetGuildUniqueId(guild)}'")).FirstOrDefault();
         }
 
-        public Category GetDefaultCategory(ChatGuild guild)
+        public async Task<Category> GetDefaultCategory(ChatGuild guild)
         {
-            return Database.Query<Category>($"SELECT * FROM Category WHERE GuildUniqueId = '{GetGuildUniqueId(guild)}' AND Name = 'Default'").FirstOrDefault();
+            return (await Database.QueryAsync<Category>($"SELECT * FROM Category WHERE GuildUniqueId = '{await GetGuildUniqueId(guild)}' AND Name = 'Default'")).FirstOrDefault();
         }
 
-        public void AddDefaultCategory(ChatGuild guild)
+        public async Task AddDefaultCategory(ChatGuild guild)
         {
-            Category category = new Category("Default", guild);            
-            Database.Insert(category);
-            Database.Insert(new CategoryConfig(category));
-
-            if (guild.Client is IAddReaction && guild.Client.Name != "Vk")
-            {
-                Database.Insert(new BattleReaction("🐷", category));
-            }
+            Category category = new Category("Default", guild);
             List<BattlePicture> pictures = new List<BattlePicture>();
             string defaultBattlePicturesPath = @$"{AutoPigs.DataPath}{guild.Client.Name}\DefaultBattlePictures";
-
             if (!Directory.Exists(defaultBattlePicturesPath))
             {
                 Directory.CreateDirectory(defaultBattlePicturesPath);
             }
 
-            foreach (string battlePicture in Directory.GetFiles(defaultBattlePicturesPath, "*", SearchOption.TopDirectoryOnly))
+            try
             {
-                Database.Insert(new BattlePicture(battlePicture, category));
+                await Database.RunInTransactionAsync(async (database) =>
+                {
+                    await Database.InsertAsync(category);
+                    await Database.InsertAsync(new CategoryConfig(category));
+                    if (guild.Client is IAddReaction && guild.Client.Name != "Vk")
+                    {
+                        await Database.InsertAsync(new BattleReaction("🐷", category));
+                    }
+                    foreach (string battlePicture in Directory.GetFiles(defaultBattlePicturesPath, "*", SearchOption.TopDirectoryOnly))
+                    {
+                        await Database.InsertAsync(new BattlePicture(battlePicture, category));
+                    }
+                });
             }
-        }
-
-        public CategoryConfig GetCategoryConfig(Category category) 
-        {
-            return Database.Query<CategoryConfig>($"SELECT * FROM CategoryConfig WHERE CategoryId = {category.Id}").FirstOrDefault();
-        } 
-
-        public List<BattlePicture> GetBattlePictures(Category category) 
-        {
-            return Database.Query<BattlePicture>($"SELECT * FROM BattlePicture WHERE CategoryId = {category.Id}").ToList();
-        }
-
-        public List<BattleReaction> GetBattleEmojis(Category category)
-        {
-            return Database.Query<BattleReaction>($"SELECT * FROM BattleReaction WHERE CategoryId = {category.Id}").ToList();
-        }
-
-
-        /*public static Server GetServerByLocalId(string localId)
-        {
-            return DatabaseHandler.Database.Query<Server>($"SELECT * FROM Server WHERE LocalId = {localId}").SingleOrDefault();
-        }
-        public static ServerConfig GetServerConfigByServerId(string serverId)
-        {
-            return DatabaseHandler.Database.Query<ServerConfig>($"SELECT * FROM ServerConfig WHERE ServerId = {serverId}").SingleOrDefault();
-        }
-
-        public static string GetLanguageCodeByServerConfig(string serverId)
-        {
-            ServerConfig config = DatabaseHandler.Database.Query<ServerConfig>($"SELECT * From ServerConfig").SingleOrDefault();
-            if (config != null)
+            catch (Exception ex)
             {
-                return config.SelectedLanguage;
-            }
-            else return null;
 
-        }*/
-
-
-        //
-
-
-        /*public static ServerConfig GetServerConfig(string serverId)
-        {
-            foreach (ServerConfig c in
-            Database.Query<ServerConfig>($"SELECT * FROM ServerConfig")) 
-            {
-                Console.WriteLine(c.ServerId);
+                Console.WriteLine($"Exception occurred while creating default category: {ex.Message}");
             }
 
 
-            ServerConfig config = Database.Query<ServerConfig>($"SELECT * FROM ServerConfig WHERE ServerId = '{serverId}'").SingleOrDefault();
-            return config;
         }
 
-        public static string GetServerLanguage(string localId)
+        public async Task<CategoryConfig> GetCategoryConfig(Category category)
         {
-            ServerConfig config = GetServerConfig(localId);
-            if (config != null)
-            {
-                return config.SelectedLanguage;
-            }
-            else return null;
-        }*/
+            return (await Database.QueryAsync<CategoryConfig>($"SELECT * FROM CategoryConfig WHERE CategoryId = {category.Id}")).FirstOrDefault();
+        }
+
+        public async Task<List<BattlePicture>> GetBattlePictures(Category category)
+        {
+            return (await Database.QueryAsync<BattlePicture>($"SELECT * FROM BattlePicture WHERE CategoryId = {category.Id}")).ToList();
+        }
+
+        public async Task<List<BattleReaction>> GetBattleEmojis(Category category)
+        {
+            return (await Database.QueryAsync<BattleReaction>($"SELECT * FROM BattleReaction WHERE CategoryId = {category.Id}")).ToList();
+        }
     }
 }

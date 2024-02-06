@@ -30,7 +30,7 @@ namespace AutoPigs.Commands.Pigs.Categories
             {
                 databaseHandler = AutoPigs.DatabaseHandler;
                 localizer = AutoPigs.Localizer;
-                languageCode = databaseHandler.GetGuildConfig(guild).Language;
+                languageCode = await databaseHandler.GetGuildLanguage(guild);
 
                 if (Category == null)
                 {
@@ -42,7 +42,7 @@ namespace AutoPigs.Commands.Pigs.Categories
                 }
                 else
                 {
-                    databaseHandler.RemoveGuildCategory(Category);
+                    await databaseHandler.RemoveGuildCategory(Category);
                     result = "COMMANDS_PIGS_CATEGORIES_DELETE_SUCCESS";
                 }
             }

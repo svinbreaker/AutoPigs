@@ -32,7 +32,7 @@ namespace AutoPigs.Commands.Pigs.Categories
             {
                 databaseHandler = AutoPigs.DatabaseHandler;
                 localizer = AutoPigs.Localizer;
-                languageCode = databaseHandler.GetGuildConfig(guild).Language;
+                languageCode = await databaseHandler.GetGuildLanguage(guild);
 
                 if (CategoryName == null)
                 {
@@ -42,14 +42,13 @@ namespace AutoPigs.Commands.Pigs.Categories
                 {
                     result = "COMMANDS_PIGS_CATEGORIES_CREATE_ERROR_INVALID_NAME";
                 }
-                else if (databaseHandler.GetGuildCategories(guild).Where(c => c.Name == CategoryName).ToList().Count > 0)
+                else if ((await databaseHandler.GetGuildCategories(guild)).Where(c => c.Name == CategoryName).ToList().Count > 0)
                 {
                     result = "COMMANDS_PIGS_CATEGORIES_CREATE_ERROR_CATEGORY_ALREADY_EXIST";
                 }              
                 else 
                 {
-
-                    databaseHandler.AddGuildCategory(CategoryName, guild);
+                    await databaseHandler.AddGuildCategory(CategoryName, guild);
                     result = "COMMANDS_PIGS_CATEGORIES_CREATE_SUCCESS";
 
                     List<ChatMessageFile> files = context.Message.Files.Where(f => f is ChatPicture).ToList();
