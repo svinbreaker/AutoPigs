@@ -71,7 +71,9 @@ namespace AutoPigs
 
         public async Task<bool> UserIsPig(ChatUser user, ChatGuild guild)
         {
-            return (await Database.QueryAsync<Pig>($"SELECT * FROM Pig WHERE UserId = '{user.Id}' AND ClientName = '{user.Client.Name}' AND GuildId = '{guild.Id}'")).Count > 0;
+            //return (await Database.QueryAsync<Pig>($"SELECT * FROM Pig WHERE UserId = '{user.Id}' AND ClientName = '{user.Client.Name}' AND GuildId = '{guild.Id}'")).Count > 0;
+            Pig pig = await GetUserAsPig(user, guild);
+            return (pig != null);
         }
 
         public async Task AddPig(string userId, string clientName, string guildId)

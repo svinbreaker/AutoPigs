@@ -40,25 +40,25 @@ namespace AutoPigs.Commands.Pigs.Categories
                 {
                     result = "COMMANDS_ERROR_USER_NOT_FOUND";
                 }
-                else if
+                /*else if
                     (!(
                         sender.IsAdmin & !Target.IsOwner
                         || sender.IsOwner
                     ))
                 {
                     result = "COMMANDS_ERROR_NOT_ENOUGH_RIGHTS";
-                }
+                }*/
                 else if (await databaseHandler.UserIsPig(sender, guild))
                 {
-                    result = "COMMANDS_PIGS_ADD_FAIL_SENDER_IS_PIG";
+                    result = "COMMANDS_PIGS_ADD_SENDER_IS_PIG";
                 }
                 else if (!(await databaseHandler.UserIsPig(Target, guild)))
                 {
-                    result = "COMMANDS_PIGS_REMOVE_FAIL_TARGET_IS_NOT_PIG";
+                    result = "COMMANDS_PIGS_REMOVE_TARGET_IS_NOT_PIG";
                 }
                 else if (Target.Id.Equals(sender.Id))
                 {
-                    result = "COMMANDS_PIGS_ADD_FAIL_TARGET_IS_SENDER";
+                    result = "COMMANDS_PIGS_ADD_TARGET_IS_SENDER";
                 }              
                 else if (Category == null)
                 {

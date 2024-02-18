@@ -77,6 +77,7 @@ namespace AutoPigs
                 new PigsAddCommand(), new PigsRemoveCommand(), new PigsListCommand(),
                 new AddBattlePictureCommand(), new ClearBattlePicturesCommand(),
                 new SetPictureChanceCommand(),
+                new ConfigCommand(),
                 new CreateCategoryCommand(), new DeleteCategoryCommand(), new CategoriesListCommand(),
                 new SetPigCategoryCommand(), new RemovePigCategory(),
             };
