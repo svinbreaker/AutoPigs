@@ -1,4 +1,5 @@
-﻿using BulbulatorLocalization;
+﻿using AutoPigs.Commands.CommandConditions;
+using BulbulatorLocalization;
 using System;
 using System.Collections.Generic;
 using System.Linq;

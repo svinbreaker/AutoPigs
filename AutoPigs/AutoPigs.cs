@@ -109,12 +109,12 @@ namespace AutoPigs
 
         private async Task OnConnect(BotConnectedEvent clientEvent)
         {
-            await Task.CompletedTask;
+            Console.WriteLine("Connected to " + clientEvent.Client.Name);
         }
 
         private async Task OnDisconnect(BotDisconnectedEvent clientEvent)
         {
-            await clientEvent.Client.StartAsync();
+            Console.WriteLine("Disconnected from " + clientEvent.Client.Name);
         }
 
         private async Task OnMessageReceived(MessageReceivedEvent clientEvent)
@@ -127,14 +127,7 @@ namespace AutoPigs
 
             if (!(await DatabaseHandler.GuildConfigExists(guild)))
             {
-                try
-                {
-                    await DatabaseHandler.CreateGuildConfig(guild);
-                }
-                catch (Exception exception)
-                {
-                    Console.WriteLine(exception.ToString());
-                }
+                await DatabaseHandler.CreateGuildConfig(guild);
             }
 
             await CheckPigs(message);
@@ -157,7 +150,6 @@ namespace AutoPigs
             {
                 Pig pig = await DatabaseHandler.GetUserAsPig(author, guild);
                 GuildConfig config = await DatabaseHandler.GetGuildConfig(guild);
-
                 List<Category> categories = await DatabaseHandler.GetCategoriesOfPig(pig);
                 Category category = null;
                 Random random = new Random();

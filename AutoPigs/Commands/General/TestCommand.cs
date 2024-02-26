@@ -14,7 +14,7 @@ namespace AutoPigs.Commands.General
     public class TestCommand : AbstractCommand
     {
         public TestCommand() : base("test", "COMMANDS_GENERAL_TEST_DESCRIPTION") { }
-        public async override Task Execute(CommandContext context = null)
+        public async override Task Execute(CommandContext context)
         {
             AbstractBotClient client = context.Client;
             ChatGuild guild = context.Guild;
