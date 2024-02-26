@@ -120,6 +120,7 @@ namespace AutoPigs
         private async Task OnMessageReceived(MessageReceivedEvent clientEvent)
         {
             ChatMessage message = clientEvent.Message;
+            if (message.Channel.IsPrivate) return;
 
             AbstractBotClient client = message.Client;
 
