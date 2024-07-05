@@ -8,6 +8,7 @@ using СrossAppBot;
 using BulbulatorLocalization;
 using СrossAppBot.Entities;
 using AutoPigs.Tables;
+using AutoPigs.Commands.Conditions;
 
 
 namespace AutoPigs.Commands.Configuration
@@ -19,10 +20,19 @@ namespace AutoPigs.Commands.Configuration
         [CommandArgument("category", null, optional: true)]
         public Category Category { get; set; }
         public AddReactionCommand() : base("addReaction", "COMMANDS_CONFIGURATION_ADD_REACTION_DESCRIPTION") { }
-        public async override Task Execute(CommandContext context = null)
+
+        public override void Conditions()
         {
-            AbstractBotClient client = context.Client;
-            ChatGuild guild = context.Guild;
+            Condition(new SenderIsNotPigCommandCondition(Context));
+            Condition(new AdminRightsCommandCondition(Context));           
+            Condition(new CategoryExistOrEmptyCommandCondition(Context, Category?.Name ?? null));
+        }
+
+
+        protected async override Task Executee()
+        {
+            AbstractBotClient client = Context.Client;
+            ChatGroup guild = Context.ChatGroup;
             DatabaseHandler databaseHandler = AutoPigs.DatabaseHandler;
             Localizer localizer = AutoPigs.Localizer;
             string languageCode = await databaseHandler.GetGuildLanguage(guild);
@@ -51,10 +61,7 @@ namespace AutoPigs.Commands.Configuration
                     {
                         await databaseHandler.AddBattleReaction(EnteredEmoji, Category);
                         result = "COMMANDS_CONFIGURATION_ADD_REACTION_SUCCESS";
-                    }
-
-
-                    
+                    }                    
                 }
             }
             catch (Exception exception)
@@ -62,7 +69,7 @@ namespace AutoPigs.Commands.Configuration
                 Console.WriteLine($"An error occurred while executing the command '{Name}': {exception.ToString()}\n{exception.Message}");
                 result = "COMMANDS_ERROR_UNKNOWN_ERROR";
             }
-            await client.SendMessageAsync(context.Channel.Id, text: localizer.GetLocalizedString(languageCode, result));
+            await client.SendMessageAsync(Context.Channel.Id, text: localizer.GetLocalizedString(languageCode, result));
         }
     }
 }

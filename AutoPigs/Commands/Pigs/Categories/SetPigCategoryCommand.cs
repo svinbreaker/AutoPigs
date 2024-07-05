@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using СrossAppBot.Commands;
 using СrossAppBot;
 using СrossAppBot.Entities;
+using AutoPigs.Commands.Conditions;
 
 namespace AutoPigs.Commands.Pigs.Categories
 {
@@ -16,13 +17,24 @@ namespace AutoPigs.Commands.Pigs.Categories
         public ChatUser Target { get; set; }
         [CommandArgument("Category", null, optional: true)]
         public Category Category { get; set; }
+
         public SetPigCategoryCommand() : base("setCategory", "COMMANDS_PIGS_CATEGORIES_SET_PIG_CATEGORY_DESCRIPTION") { }
 
-        public override async Task Execute(CommandContext context = null)
+        public override void Conditions() 
         {
-            ChatUser sender = context.Sender;
-            AbstractBotClient client = context.Client;
-            ChatGuild guild = context.Guild;
+            Condition(new SenderIsNotPigCommandCondition(Context));
+            Condition(new HigherRightsCommandCondition(Context, Target));
+            Condition(new TargetIsNotSenderCommandCondition(Context, Target));
+            Condition(new TargetIsPigCommandCondition(Context, Target));
+            Condition(new PigHasNotTheCategoryCommandCondition(Context, Pig.FromUser(Target, Context.ChatGroup), Category));
+            Condition(new CategoryExistCommandCondition(Context, Category));
+        }
+
+        protected override async Task Executee()
+        {
+            ChatUser sender = Context.Sender;
+            AbstractBotClient client = Context.Client;
+            ChatGroup guild = Context.ChatGroup;
             string result;
             bool success = false;
 
@@ -35,36 +47,7 @@ namespace AutoPigs.Commands.Pigs.Categories
                 localizer = AutoPigs.Localizer;
                 languageCode = await databaseHandler.GetGuildLanguage(guild);
 
-
-                if (Target == null)
-                {
-                    result = "COMMANDS_ERROR_USER_NOT_FOUND";
-                }
-                /*else if
-                    (!(
-                        sender.IsAdmin & !Target.IsOwner
-                        || sender.IsOwner
-                    ))
-                {
-                    result = "COMMANDS_ERROR_NOT_ENOUGH_RIGHTS";
-                }*/
-                else if (await databaseHandler.UserIsPig(sender, guild))
-                {
-                    result = "COMMANDS_PIGS_ADD_SENDER_IS_PIG";
-                }
-                else if (!(await databaseHandler.UserIsPig(Target, guild)))
-                {
-                    result = "COMMANDS_PIGS_REMOVE_TARGET_IS_NOT_PIG";
-                }
-                else if (Target.Id.Equals(sender.Id))
-                {
-                    result = "COMMANDS_PIGS_ADD_TARGET_IS_SENDER";
-                }              
-                else if (Category == null)
-                {
-                    result = "COMMANDS_PIGS_CATEGORIES_ERROR_NOT_EXIST";
-                }
-                else if (await databaseHandler.PigHasCategory(await databaseHandler.GetUserAsPig(Target, guild), Category))
+                if (await databaseHandler.PigHasCategory(await databaseHandler.GetUserAsPig(Target, guild), Category))
                 {
                     result = "COMMANDS_PIGS_CATEGORIES_SET_PIG_CATEGORY_ERROR_ALREADY_SETTED";
                 }
@@ -87,7 +70,7 @@ namespace AutoPigs.Commands.Pigs.Categories
                 result += $" {Category.Name}";
             }
 
-            await client.SendMessageAsync(context.Channel.Id, text: result);
+            await client.SendMessageAsync(Context.Channel.Id, text: result);
         }
     }
 }

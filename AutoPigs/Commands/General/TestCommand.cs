@@ -14,15 +14,14 @@ namespace AutoPigs.Commands.General
     public class TestCommand : AbstractCommand
     {
         public TestCommand() : base("test", "COMMANDS_GENERAL_TEST_DESCRIPTION") { }
-        public async override Task Execute(CommandContext context)
+        protected async override Task Executee()
         {
-            AbstractBotClient client = context.Client;
-            ChatGuild guild = context.Guild;
+            ChatGroup guild = Context.ChatGroup;
             DatabaseHandler databaseHandler = AutoPigs.DatabaseHandler;
             Localizer localizer = AutoPigs.Localizer;
             string languageCode = await databaseHandler.GetGuildLanguage(guild);
 
-            await client.SendMessageAsync(context.Channel.Id, localizer.GetLocalizedString(languageCode, "COMMANDS_GENERAL_TEST_SUCCESS"));
+            await Context.AnswerAsync(localizer.GetLocalizedString(languageCode, "COMMANDS_GENERAL_TEST_SUCCESS"), null, true);
         }
     }
 }

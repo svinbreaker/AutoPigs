@@ -14,10 +14,10 @@ namespace AutoPigs.Commands.Pigs
     {
         public PigsListCommand() : base("list", "COMMANDS_PIGS_LIST_DESCRIPTION") { }
 
-        public override async Task Execute(CommandContext context = null)
+        protected override async Task Executee()
         {
-            AbstractBotClient client = context.Client;
-            ChatGuild guild = context.Guild;
+            AbstractBotClient client = Context.Client;
+            ChatGroup guild = Context.ChatGroup;
             string result;
 
             string languageCode;
@@ -56,10 +56,10 @@ namespace AutoPigs.Commands.Pigs
             catch (Exception exception)
             {
                 Console.WriteLine($"An error occurred while executing the command '{Name}': {exception.ToString()}\n{exception.Message}");
-                result = "ошибка";
+                result = " COMMANDS_ERROR_UNKNOWN_ERROR";
             }
 
-            await client.SendMessageAsync(context.Channel.Id, result);
+            await Context.AnswerAsync(result, null, true);
         }
     }
 }

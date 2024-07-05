@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using СrossAppBot.Commands;
 using СrossAppBot;
 using СrossAppBot.Entities;
+using AutoPigs.Commands.Conditions;
 
 namespace AutoPigs.Commands.Pigs.Categories
 {
@@ -16,10 +17,17 @@ namespace AutoPigs.Commands.Pigs.Categories
         public Category Category { get; set; }
         public DeleteCategoryCommand() : base("deleteCategory", "COMMANDS_PIGS_CATEGORIES_DELETE_DESCRIPTION") { }
 
-        public override async Task Execute(CommandContext context = null)
+        public override void Conditions()
         {
-            ChatGuild guild = context.Guild;
-            AbstractBotClient client = context.Client;
+            Condition(new SenderIsNotPigCommandCondition(Context));
+            Condition(new AdminRightsCommandCondition(Context));
+            Condition(new CategoryExistCommandCondition(Context, Category));
+        }
+
+        protected override async Task Executee()
+        {
+            ChatGroup guild = Context.ChatGroup;
+            AbstractBotClient client = Context.Client;
 
             Localizer localizer = null;
             DatabaseHandler databaseHandler;
@@ -32,11 +40,8 @@ namespace AutoPigs.Commands.Pigs.Categories
                 localizer = AutoPigs.Localizer;
                 languageCode = await databaseHandler.GetGuildLanguage(guild);
 
-                if (Category == null)
-                {
-                    result = "COMMANDS_PIGS_CATEGORIES_ERROR_NOT_EXIST";
-                }
-                else if (Category.Name == "Default") 
+
+                if (Category.Name == "Default")
                 {
                     result = "COMMANDS_PIGS_CATEGORIES_ERROR_DEFAULT";
                 }
@@ -52,7 +57,7 @@ namespace AutoPigs.Commands.Pigs.Categories
                 result = "COMMANDS_ERROR_UNKNOWN_ERROR";
             }
 
-            await client.SendMessageAsync(context.Channel.Id, localizer.GetLocalizedString(languageCode, result));
+            await client.SendMessageAsync(Context.Channel.Id, localizer.GetLocalizedString(languageCode, result));
         }
     }
 }

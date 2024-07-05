@@ -1,4 +1,5 @@
 ﻿using AutoPigs.Commands.CommandConditions;
+using AutoPigs.Commands.Conditions;
 using BulbulatorLocalization;
 using System;
 using System.Collections.Generic;
@@ -20,13 +21,22 @@ namespace AutoPigs.Commands.Pigs
         public Category Category { get; set; }
         public PigsAddCommand() : base("add", "COMMANDS_PIGS_ADD_DESCRIPTION") { }
 
-        public override async Task Execute(CommandContext context = null)
+        public override void Conditions()
         {
-            ChatUser sender = context.Sender;
-            AbstractBotClient client = context.Client;
-            ChatGuild guild = context.Guild;
+            Condition(new SenderIsNotPigCommandCondition(Context));
+            Condition(new HigherRightsCommandCondition(Context, Target));
+            Condition(new UserExistCommandCondition(Context, Target));
+            Condition(new CategoryExistOrEmptyCommandCondition(Context, Category?.Name ?? null));
+            Condition(new TargetIsNotPigCommandCondition(Context, Target));
+            Condition(new TargetIsNotSenderCommandCondition(Context, Target));
+        }
+
+        protected override async Task Executee()
+        {
+            ChatUser sender = Context.Sender;
+            AbstractBotClient client = Context.Client;
+            ChatGroup guild = Context.ChatGroup;
             string result;
-            bool success = false;
 
             string languageCode = null;
             Localizer localizer = null;
@@ -37,45 +47,15 @@ namespace AutoPigs.Commands.Pigs
                 localizer = AutoPigs.Localizer;
                 languageCode = await databaseHandler.GetGuildLanguage(guild);
 
-
-                if (Target == null)
+                if (Category == null)
                 {
-                    result = "COMMANDS_ERROR_USER_NOT_FOUND";
-                }
-                else if
-                    (!(
-                        sender.IsAdmin & !Target.IsOwner
-                        || sender.IsOwner
-                    ))
-                {
-                    result = "COMMANDS_ERROR_NOT_ENOUGH_RIGHTS";
-                }
-                else if (await databaseHandler.UserIsPig(sender, guild))
-                {
-                    result = "COMMANDS_PIGS_ADD_FAIL_SENDER_IS_PIG";
-                }
-                else if (await databaseHandler.UserIsPig(Target, guild))
-                {
-                    result = "COMMANDS_PIGS_ADD_FAIL_TARGET_IS_PIG";
-                }
-                else if (Target.Id.Equals(sender.Id))
-                {
-                    result = "COMMANDS_PIGS_ADD_FAIL_TARGET_IS_SENDER";
-                }
-                else 
-                {
-                    if (Category == null) 
-                    {
-                        Category = await databaseHandler.GetDefaultCategory(guild);
-                    }
-
-                    Pig pig = new Pig(Target, guild);
-                    await databaseHandler.AddPig(pig);
-                    await databaseHandler.SetPigCategory(pig, Category);
-                    result = "COMMANDS_PIGS_ADD_SUCCESS";
-                    success = true;
+                    Category = await databaseHandler.GetDefaultCategory(guild);
                 }
 
+                Pig pig = new Pig(Target, guild);
+                await databaseHandler.AddPig(pig);
+                await databaseHandler.SetPigCategory(pig, Category);
+                result = "COMMANDS_PIGS_ADD_SUCCESS";
             }
             catch (Exception exception)
             {
@@ -83,15 +63,7 @@ namespace AutoPigs.Commands.Pigs
                 result = "COMMANDS_ERROR_UNKNOWN_ERROR";
             }
 
-            if (localizer != null)
-            {
-                result = localizer.GetLocalizedString(languageCode, result);
-            }
-            if (success)
-            {
-                result = $"{client.Mention(Target)} {result}";
-            }
-            await client.SendMessageAsync(context.Channel.Id, result);
+            await Context.AnswerAsync(client.Mention(Target) + " " + localizer.GetLocalizedString(languageCode, result), null, true);
         }
     }
 }

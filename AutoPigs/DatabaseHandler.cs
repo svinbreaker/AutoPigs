@@ -46,7 +46,7 @@ namespace AutoPigs
             Database = new SQLite.SQLiteAsyncConnection(FilePath);
         }
 
-        public async Task<bool> UserIsPig(ChatUser user, ChatGuild guild)
+        public async Task<bool> UserIsPig(ChatUser user, ChatGroup guild)
         {
             //return (await Database.QueryAsync<Pig>($"SELECT * FROM Pig WHERE UserId = '{user.Id}' AND ClientName = '{user.Client.Name}' AND GuildId = '{guild.Id}'")).Count > 0;
             Pig pig = await GetUserAsPig(user, guild);
@@ -69,7 +69,7 @@ namespace AutoPigs
             await Database.DeleteAsync(pig);
         }
 
-        public async Task<Pig> GetUserAsPig(ChatUser user, ChatGuild guild)
+        public async Task<Pig> GetUserAsPig(ChatUser user, ChatGroup guild)
         {
             return (await Database.QueryAsync<Pig>($"SELECT * FROM Pig WHERE UserId = '{user.Id}' AND ClientName = '{user.Client.Name}' AND GuildId = '{guild.Id}'")).FirstOrDefault();
         }
@@ -79,7 +79,7 @@ namespace AutoPigs
             return (await Database.QueryAsync<Pig>($"SELECT * FROM Pig WHERE GuildId = '{guildId}' AND ClientName = '{clientName}'")).ToList();
         }
 
-        public async Task CreateGuildConfig(ChatGuild guild)
+        public async Task CreateGuildConfig(ChatGroup guild)
         {
             Guild guildObject = new Guild(guild);
             await Database.InsertAsync(guildObject);
@@ -88,30 +88,38 @@ namespace AutoPigs
             await AddDefaultCategory(guild);
         }
 
-        public async Task<bool> GuildConfigExists(ChatGuild guild)
+        public async Task<bool> GuildConfigExists(ChatGroup guild)
         {
-            return (await Database.QueryAsync<GuildConfig>($"SELECT * FROM Guild WHERE Id = '{guild.Id}' AND ClientName = '{guild.Client.Name}'")).Count > 0;
+            try
+            {
+                return (await Database.QueryAsync<GuildConfig>($"SELECT * FROM Guild WHERE Id = '{guild.Id}' AND ClientName = '{guild.Client.Name}'")).Count > 0;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString() + " " + e.Message);
+                return false;
+            }
         }
 
-        public async Task<string> GetGuildLanguage(ChatGuild guild)
+        public async Task<string> GetGuildLanguage(ChatGroup guild)
         {
             GuildConfig config = await GetGuildConfig(guild);
             return config.Language;
         }
 
-        public async Task<GuildConfig> GetGuildConfig(ChatGuild guild)
+        public async Task<GuildConfig> GetGuildConfig(ChatGroup guild)
         {
             string guildUniqueId = await GetGuildUniqueId(guild);
             return (await Database.QueryAsync<GuildConfig>($"SELECT * FROM GuildConfig WHERE GuildUniqueId = '{guildUniqueId}'")).FirstOrDefault();
         }
 
-        public async Task<List<Category>> GetGuildCategories(ChatGuild guild)
+        public async Task<List<Category>> GetGuildCategories(ChatGroup guild)
         {
             string guildUniqueId = await GetGuildUniqueId(guild);
             return await Database.QueryAsync<Category>($"SELECT * FROM Category WHERE GuildUniqueId = '{guildUniqueId}'");
         }
 
-        public async Task AddGuildCategory(string categoryName, ChatGuild guild)
+        public async Task AddGuildCategory(string categoryName, ChatGroup guild)
         {
             Category category = new Category(categoryName, guild);
 
@@ -125,7 +133,8 @@ namespace AutoPigs
         {
             try
             {
-                await Database.DeleteAsync(GetCategoryConfig(category));
+                CategoryConfig config = await GetCategoryConfig(category);
+                await Database.DeleteAsync(config);
                 foreach (Pig pig in await GetPigsOfCategory(category))
                 {
                     await RemovePigCategory(pig, category);
@@ -146,7 +155,7 @@ namespace AutoPigs
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception occurred while removing guild category: {ex.Message}");
+                Console.WriteLine($"Exception occurred while removing guild category: {ex.Message} + " + ex.ToString());
             }
         }
 
@@ -176,7 +185,7 @@ namespace AutoPigs
             return await Database.QueryAsync<Category>($"SELECT * FROM Category JOIN PigsCategories ON Category.Id = PigsCategories.CategoryId WHERE PigsCategories.PigId = {pig.Id}");
         }
 
-        public async Task AddBattlePicture(ChatPicture picture, Category category, ChatGuild guild)
+        public async Task AddBattlePicture(ChatPicture picture, Category category, ChatGroup guild)
         {
             string pictureLocation = null;
             try
@@ -246,7 +255,7 @@ namespace AutoPigs
 
         }
 
-        public async Task<Guild> GetGuild(ChatGuild guild)
+        public async Task<Guild> GetGuild(ChatGroup guild)
         {
             return (await Database.QueryAsync<Guild>($"SELECT * FROM Guild WHERE Id = '{guild.Id}' AND ClientName = '{guild.Client.Name}'")).FirstOrDefault();
         }
@@ -256,25 +265,25 @@ namespace AutoPigs
             return (await Database.QueryAsync<Guild>($"SELECT * FROM Guild WHERE UniqueId = '{uniqueId}'")).FirstOrDefault();
         }
 
-        public async Task<string> GetGuildUniqueId(ChatGuild guild)
+        public async Task<string> GetGuildUniqueId(ChatGroup guild)
         {
             string uniqueId = (await Database.QueryAsync<Guild>($"SELECT * FROM Guild WHERE Id = '{guild.Id}' AND ClientName = '{guild.Client.Name}'")).FirstOrDefault().UniqueId;
             return uniqueId;
         }
 
-        public async Task<Category> GetGuildCategory(string name, ChatGuild guild)
+        public async Task<Category> GetGuildCategory(string name, ChatGroup guild)
         {
             string uniqueId = (await Database.QueryAsync<Guild>($"SELECT * FROM Guild WHERE Id = '{guild.Id}' AND ClientName = '{guild.Client.Name}'")).FirstOrDefault().UniqueId;
             return (await Database.QueryAsync<Category>($"SELECT * FROM Category WHERE GuildUniqueId = '{uniqueId}'")).FirstOrDefault();
         }
 
-        public async Task<Category> GetDefaultCategory(ChatGuild guild)
+        public async Task<Category> GetDefaultCategory(ChatGroup guild)
         {
             string uniqueId = (await Database.QueryAsync<Guild>($"SELECT * FROM Guild WHERE Id = '{guild.Id}' AND ClientName = '{guild.Client.Name}'")).FirstOrDefault().UniqueId;
             return (await Database.QueryAsync<Category>($"SELECT * FROM Category WHERE GuildUniqueId = '{uniqueId}' AND Name = 'Default'")).FirstOrDefault();
         }
 
-        public async Task AddDefaultCategory(ChatGuild guild)
+        public async Task AddDefaultCategory(ChatGroup guild)
         {
             Category category = new Category("Default", guild);
             List<BattlePicture> pictures = new List<BattlePicture>();
@@ -308,7 +317,8 @@ namespace AutoPigs
 
         public async Task<CategoryConfig> GetCategoryConfig(Category category)
         {
-            return (await Database.QueryAsync<CategoryConfig>($"SELECT * FROM CategoryConfig WHERE CategoryId = {category.Id}")).FirstOrDefault();
+            CategoryConfig config = (await Database.QueryAsync<CategoryConfig>($"SELECT * FROM CategoryConfig WHERE CategoryId = {category.Id}")).FirstOrDefault();
+            return config;
         }
 
         public async Task<List<BattlePicture>> GetBattlePictures(Category category)

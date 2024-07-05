@@ -7,6 +7,7 @@ using СrossAppBot.Commands;
 using СrossAppBot;
 using BulbulatorLocalization;
 using СrossAppBot.Entities;
+using AutoPigs.Commands.Conditions;
 
 namespace AutoPigs.Commands.Configuration
 {
@@ -14,11 +15,19 @@ namespace AutoPigs.Commands.Configuration
     {
         [CommandArgument("language", null, true)]
         public string SelectedLanguage { get; set; }
+
         public SetLanguageCommand() : base("language", "COMMANDS_CONFIGURATION_LANGUAGE_DESCRIPTION") { }
-        public async override Task Execute(CommandContext context = null)
+
+        public override void Conditions() 
         {
-            AbstractBotClient client = context.Client;
-            ChatGuild guild = context.Guild;
+            Condition(new SenderIsNotPigCommandCondition(Context));
+            Condition(new AdminRightsCommandCondition(Context));
+        }
+
+        protected async override Task Executee()
+        {
+            AbstractBotClient client = Context.Client;
+            ChatGroup guild = Context.ChatGroup;
             DatabaseHandler databaseHandler = AutoPigs.DatabaseHandler;
             Localizer localizer = AutoPigs.Localizer;
             string languageCode = await databaseHandler.GetGuildLanguage(guild);
@@ -45,7 +54,7 @@ namespace AutoPigs.Commands.Configuration
                 result = localizer.GetLocalizedString(SelectedLanguage, "COMMANDS_CONFIGURATION_LANGUAGE_SUCCESS");
             }
            
-            await client.SendMessageAsync(context.Channel.Id, result);
+            await client.SendMessageAsync(Context.Channel.Id, result);
         }
     }
 }

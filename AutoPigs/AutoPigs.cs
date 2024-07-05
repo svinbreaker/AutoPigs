@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using VkNet.Exception;
 using СrossAppBot;
 using СrossAppBot.Commands;
 using СrossAppBot.Commands.Parameters;
@@ -57,6 +58,23 @@ namespace AutoPigs
             }
         }
 
+        private static CommandManager commandManager;
+        private static List<IArgumentParser> parsers = new List<IArgumentParser>() { new PigArgumentParser(), new CategoryArgumentParser() };
+
+        private static List<AbstractCommand> universalCommands = new List<AbstractCommand>
+            {
+                new HelpCommand(), new TestCommand(), new SetLanguageCommand(),
+                new PigsAddCommand(), new PigsRemoveCommand(), new PigsListCommand(),
+                new AddBattlePictureCommand(), new ClearBattlePicturesCommand(),
+                new SetPictureChanceCommand(),
+                new ConfigCommand(),
+                new CreateCategoryCommand(), new DeleteCategoryCommand(), new CategoriesListCommand(),
+                new SetPigCategoryCommand(), new RemovePigCategory(),
+            };
+        private static List<AbstractCommand> emojiCommands = new List<AbstractCommand> { new AddReactionCommand(), new RemoveReactionCommand(), new SetReactionChanceCommand() };
+
+
+
         private static string _botDataFile = DataPath + $@"botsInfo.json";
 
         public static Task Main(string[] args) => new AutoPigs().MainAsync();
@@ -91,11 +109,12 @@ namespace AutoPigs
                 bot.EventManager.Subscribe<MessageReceivedEvent>(OnMessageReceived);
                 bot.EventManager.Subscribe<MessageEditedEvent>(OnMessageEdited);
 
-                bot.TextCommandProcessor = new TextCommandProcessor("p.", universalCommands, parsers);
+                bot.CommandManager.SetTextCommandHelper("p.", parsers);
 
                 if (bot is IAddReaction)
                 {
-                    bot.TextCommandProcessor.AddCommands(emojiCommands);
+                    bot.CommandManager.AddCommands(universalCommands);
+                    bot.CommandManager.AddCommands(emojiCommands);
                 }
             }
 
@@ -124,16 +143,27 @@ namespace AutoPigs
 
             AbstractBotClient client = message.Client;
 
-            ChatGuild guild = message.Guild;
+            ChatGroup guild = message.Guild;
 
             if (!(await DatabaseHandler.GuildConfigExists(guild)))
             {
                 await DatabaseHandler.CreateGuildConfig(guild);
             }
-
+            
             await CheckPigs(message);
 
-            await client.TextCommandProcessor.ProcessCommand(message.Text, message.GetAsCommandContext());
+            AbstractCommand command = client.CommandManager.TextCommandHelper.CreateCommandInstance(message.Text, CommandContext.FromMessage(message));         
+            if (command != null) 
+            {
+                try
+                {
+                    await command.Execute();
+                } 
+                catch (Exception e) 
+                {
+                    Console.WriteLine(e.Message + " " + e.ToString());
+                }
+            }
         }
 
         public static Task OnMessageEdited(MessageEditedEvent clientEvent)
@@ -143,7 +173,7 @@ namespace AutoPigs
 
         private static async Task CheckPigs(ChatMessage message)
         {
-            ChatGuild guild = message.Guild;
+            ChatGroup guild = message.Guild;
             AbstractBotClient client = message.Client;
             ChatUser author = message.Author;
 

@@ -16,7 +16,7 @@ namespace AutoPigs.Commands.ArgumentParsers
             Pig pig = null;
             if (context != null)
             {
-                pig = AutoPigs.DatabaseHandler.GetUserAsPig(context.Client.GetUserByMention(context.Message, value).Result, context.Guild).Result;
+                pig = AutoPigs.DatabaseHandler.GetUserAsPig(context.Client.GetUserByMention(context.Message, value).Result, context.ChatGroup).Result;
             }
 
             return pig;

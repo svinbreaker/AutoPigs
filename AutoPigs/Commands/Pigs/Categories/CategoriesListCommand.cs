@@ -13,10 +13,10 @@ namespace AutoPigs.Commands.Pigs.Categories
     {
         public CategoriesListCommand() : base("categories", "COMMANDS_PIGS_CATEGORIES_LIST_DESCRIPTION") { }
 
-        public override async Task Execute(CommandContext context = null)
+        protected override async Task Executee()
         {
-            AbstractBotClient client = context.Client;
-            ChatGuild guild = context.Guild;
+            AbstractBotClient client = Context.Client;
+            ChatGroup guild = Context.ChatGroup;
             string result;
 
             string languageCode;
@@ -50,7 +50,7 @@ namespace AutoPigs.Commands.Pigs.Categories
                 result = "COMMANDS_ERROR_UNKNOWN_ERROR";
             }
 
-            await client.SendMessageAsync(context.Channel.Id, result);
+            await client.SendMessageAsync(Context.Channel.Id, result);
         }
     }
 }

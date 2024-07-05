@@ -8,6 +8,7 @@ using СrossAppBot.Commands;
 using СrossAppBot.Entities;
 using СrossAppBot;
 using AutoPigs.Tables;
+using AutoPigs.Commands.Conditions;
 
 namespace AutoPigs.Commands.Pigs.Categories
 {
@@ -16,10 +17,16 @@ namespace AutoPigs.Commands.Pigs.Categories
         [CommandArgument("category", null, optional: true)]
         public Category Category { get; set; }
         public ConfigCommand() : base("config", "COMMANDS_CONFIG_DESCRIPTION") { }
-        public async override Task Execute(CommandContext context = null)
+
+        public override void Conditions()
         {
-            AbstractBotClient client = context.Client;
-            ChatGuild guild = context.Guild;
+            Condition(new CategoryExistOrEmptyCommandCondition(Context, Category?.Name ?? null));
+        }
+
+        protected async override Task Executee()
+        {
+            AbstractBotClient client = Context.Client;
+            ChatGroup guild = Context.ChatGroup;
             DatabaseHandler databaseHandler = AutoPigs.DatabaseHandler;
             Localizer localizer = AutoPigs.Localizer;
             string languageCode = await databaseHandler.GetGuildLanguage(guild);
@@ -54,7 +61,7 @@ namespace AutoPigs.Commands.Pigs.Categories
                 Console.WriteLine($"An error occurred while executing the command '{Name}': {exception.ToString()}\n{exception.Message}");
                 result = "COMMANDS_ERROR_UNKNOWN_ERROR";
             }
-            await client.SendMessageAsync(context.Channel.Id, text: result);
+            await client.SendMessageAsync(Context.Channel.Id, text: result);
         }
     }
 }

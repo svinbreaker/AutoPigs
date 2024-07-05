@@ -18,12 +18,12 @@ namespace AutoPigs.Commands.General
 
         public HelpCommand() : base("help", "COMMANDS_GENERAL_HELP_DESCRIPTION") { }
 
-        public override async Task Execute(CommandContext context = null)
+        protected override async Task Executee()
         {
 
-            ChatUser sender = context.Sender;
-            AbstractBotClient client = context.Client;
-            ChatGuild guild = context.Guild;
+            ChatUser sender = Context.Sender;
+            AbstractBotClient client = Context.Client;
+            ChatGroup guild = Context.ChatGroup;
             string result;
             ChatUser target = Target;
 
@@ -35,13 +35,11 @@ namespace AutoPigs.Commands.General
                 localizer = AutoPigs.Localizer;
                 languageCode = await databaseHandler.GetGuildLanguage(guild);
 
-                string prefix = client.TextCommandProcessor.Prefix;
+                string prefix = client.CommandManager.TextCommandHelper.Prefix;
                 StringBuilder builder = new StringBuilder();
                 builder.Append($"{localizer.GetLocalizedString(languageCode, "COMMANDS_GENERAL_HELP_SUCCESS")}\n");
-                Dictionary<string, AbstractCommand> commands = client.TextCommandProcessor.commands;
-                foreach (KeyValuePair<string, AbstractCommand> args in commands)
+                foreach (AbstractCommand command in client.CommandManager.Commands)
                 {
-                    AbstractCommand command = args.Value;
                     builder.Append($"{prefix}{command.Name}");
                     foreach (PropertyInfo property in command.GetType().GetProperties().Where(property => property.IsDefined(typeof(CommandArgumentAttribute), false)).ToList())
                     {
@@ -57,7 +55,7 @@ namespace AutoPigs.Commands.General
                 result = "Unknown error";
             }
 
-            await client.SendMessageAsync(context.Channel.Id, result);
+            await Context.AnswerAsync(result, null, true);
         }
     }
 }

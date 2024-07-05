@@ -10,8 +10,12 @@
 
   "COMMANDS_ERROR_COMMAND_NOT_FOUND": "Команда не найдена.",
   "COMMANDS_ERROR_NOT_ENOUGH_RIGHTS": "Недостаточно прав.",
+  "COMMANDS_ERROR_SENDER_IS_PIG": "У свиней нет права на это действие.",
+  "COMMANDS_ERROR_TARGET_IS_NOT_PIG": "Пользователь не является свиньёй.",
+  "COMMANDS_ERROR_TARGET_IS_PIG": "Пользователь уже является свиньёй.",
   "COMMANDS_ERROR_INVALID_ARGUMENTS": "Неверные аргументы.",
   "COMMANDS_ERROR_USER_NOT_FOUND": "Пользователь не найден.",
+  "COMMANDS_ERROR_TARGET_IS_SENDER": "Вы не можете использовать эту команду на себе.",
   "COMMANDS_ERROR_UNKNOWN_ERROR": "Произошла неизвестная ошибка.",
   
   "COMMANDS_PIGS_ADD_DESCRIPTION": "Добавить пользователя в список свиней.",
@@ -51,6 +55,8 @@
   "COMMANDS_PIGS_CATEGORIES_LIST_DESCRIPTION": "Отобразить список категорий.",
   "COMMANDS_PIGS_CATEGORIES_LIST_SUCCESS": "Список категорий:",
   "COMMANDS_PIGS_CATEGORIES_LIST_EMPTY": "Категории не были созданы.",
+  "COMMANDS_PIGS_CATEGORIES_ERROR_PIG_ALREADY_HAVE_THE_CATEGORY": "Свинье уже присвоена категория.",
+  "СOMMANDS_PIGS_CATEGORIES_ERROR_PIG_HAS_NOT_THE_CATEGORY": "У свиньи нет этой категории.",
 
   "COMMANDS_CONFIGURATION_ADD_REACTION_DESCRIPTION": "Добавить боевую реакцию.",
   "COMMANDS_CONFIGURATION_ADD_REACTION_ERROR_NOT_EMOJI": "Некорректное эмодзи.",

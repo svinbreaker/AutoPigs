@@ -8,33 +8,39 @@ using СrossAppBot.Commands;
 using СrossAppBot.Entities.Files;
 using СrossAppBot;
 using СrossAppBot.Entities;
+using AutoPigs.Commands.Conditions;
 
 namespace AutoPigs.Commands.Pigs.Categories
 {
     public class ClearBattlePicturesCommand : AbstractCommand
     {
         [CommandArgument("Category", null)]
-        public Category Category { get; }
+        public Category Category { get; set; }
         public ClearBattlePicturesCommand() : base("clearBattlePictures", "COMMANDS_PIGS_CATEGORIES_CLEAR_BATTLE_PICTURES_DESCRIPTION") { }
 
-        public override async Task Execute(CommandContext context = null)
+        public override void Conditions()
+        {
+            Condition(new SenderIsNotPigCommandCondition(Context));
+            Condition(new AdminRightsCommandCondition(Context));
+            Condition(new CategoryExistOrEmptyCommandCondition(Context, Category?.Name ?? null));
+        }
+
+        protected override async Task Executee()
         {
             string result;
             DatabaseHandler databaseHandler = AutoPigs.DatabaseHandler;
             Localizer localizer = AutoPigs.Localizer;
-            ChatGuild guild = context.Guild;
+            ChatGroup guild = Context.ChatGroup;
             string languageCode = await databaseHandler.GetGuildLanguage(guild);
 
             try
             {
                 if (Category == null)
                 {
-                    result = "COMMANDS_PIGS_CATEGORIES_ERROR_NOT_EXIST";
+                    Category = await databaseHandler.GetDefaultCategory(guild);
                 }
-                else
-                {
-                    result = "COMMANDS_PIGS_CATEGORIES_CLEAR_BATTLE_PICTURES_SUCCESS";
-                }
+                await databaseHandler.ClearBattlePictures(Category);
+                result = "COMMANDS_PIGS_CATEGORIES_CLEAR_BATTLE_PICTURES_SUCCESS";
             }
             catch (Exception exception)
             {
@@ -42,7 +48,7 @@ namespace AutoPigs.Commands.Pigs.Categories
                 result = "COMMANDS_ERROR_UNKNOWN_ERROR";
             }
 
-            await guild.Client.SendMessageAsync(context.Channel.Id, result);
+            await guild.Client.SendMessageAsync(Context.Channel.Id, result);
         }
 
     }

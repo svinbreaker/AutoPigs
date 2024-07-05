@@ -22,7 +22,7 @@ namespace AutoPigs
 
         public Guild() { }
 
-        public Guild(ChatGuild guild)
+        public Guild(ChatGroup guild)
         {
             Id = guild.Id;
             ClientName = guild.Client.Name;

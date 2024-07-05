@@ -26,7 +26,7 @@ namespace AutoPigs
             this.GuildUniqueId = GuildUniqueId;
         }
 
-        public Category(string name, ChatGuild guild) 
+        public Category(string name, ChatGroup guild) 
         {
             this.Name = name;
             this.GuildUniqueId = AutoPigs.DatabaseHandler.GetGuildUniqueId(guild).Result;

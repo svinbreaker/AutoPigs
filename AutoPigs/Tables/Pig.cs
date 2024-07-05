@@ -31,11 +31,16 @@ namespace AutoPigs
             ClientName = clientName;
         }
 
-        public Pig(ChatUser user, ChatGuild guild) 
+        public Pig(ChatUser user, ChatGroup guild) 
         {
             GuildId = guild.Id;
             UserId = user.Id;
             ClientName = user.Client.Name;
+        }
+
+        public static Pig FromUser(ChatUser user, ChatGroup guild) 
+        {
+            return AutoPigs.DatabaseHandler.GetUserAsPig(user, guild).Result;
         }
 
         /*public static bool UserIsMarked(AppUser user, AppGuild server) 
