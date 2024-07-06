@@ -193,9 +193,8 @@ namespace AutoPigs
                     }
                     else
                     {
-                        category = categories[random.Next(0, categories.Count - 1)];
+                        category = categories[random.Next(0, categories.Count)];
                     }
-
 
                     BattlePicture picture;
                     CategoryConfig categoryConfig = await DatabaseHandler.GetCategoryConfig(category);

@@ -182,7 +182,7 @@ namespace AutoPigs
 
         public async Task<List<Category>> GetCategoriesOfPig(Pig pig)
         {
-            return await Database.QueryAsync<Category>($"SELECT * FROM Category JOIN PigsCategories ON Category.Id = PigsCategories.CategoryId WHERE PigsCategories.PigId = {pig.Id}");
+            return await Database.QueryAsync<Category>($"SELECT * FROM PigsCategories pc JOIN Pig p ON pc.PigId = p.Id JOIN Category c ON pc.CategoryId = c.Id WHERE p.Id = {pig.Id}");
         }
 
         public async Task AddBattlePicture(ChatPicture picture, Category category, ChatGroup guild)
