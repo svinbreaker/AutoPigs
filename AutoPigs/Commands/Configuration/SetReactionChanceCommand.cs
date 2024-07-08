@@ -63,7 +63,7 @@ namespace AutoPigs.Commands.Configuration
                 Console.WriteLine($"An error occurred while executing the command '{Name}': {exception.ToString()}\n{exception.Message}");
                 result = "COMMANDS_ERROR_UNKNOWN_ERROR";
             }
-            await client.SendMessageAsync(Context.Channel.Id, text: result);
+            await client.SendMessageAsync(Context.Channel.Id, localizer.GetLocalizedString(languageCode, result));
         }
     }
 }

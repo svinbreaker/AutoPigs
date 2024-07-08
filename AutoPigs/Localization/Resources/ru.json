@@ -67,6 +67,9 @@
   "COMMANDS_CONFIGURATION_REACTION_CHANCE_DESCRIPTION": "Изменить вероятность боевой реакции",
   "COMMANDS_CONFIGURATION_REACTION_CHANCE_SUCCESS": "Вероятность боевой реакции изменена.",
   "COMMANDS_CONFIGURATION_REACTION_CHANCE_ERROR": "Число должно быть не меньше 0 и не больше 100",
+  "COMMANDS_CONFIGURATION_PICTURE_CHANCE_DESCRIPTION": "Изменить вероятность боевой реакции",
+  "COMMANDS_CONFIGURATION_PICTURE_CHANCE_SUCCESS": "Вероятность боевой картинки изменена.",
+  "COMMANDS_CONFIGURATION_PICTURE_CHANCE_ERROR": "Число должно быть не меньше 0 и не больше 100",
   
   "COMMANDS_PIGS_ADD_BATTLE_PICTURE_DESCRIPTION": "Загрузить боевую картинку.",
   "COMMANDS_PIGS_ADD_BATTLE_PICTURE_SUCCESS": "Боевая картинка загружена.",
