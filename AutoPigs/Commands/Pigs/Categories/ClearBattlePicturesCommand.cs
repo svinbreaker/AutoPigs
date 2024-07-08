@@ -16,7 +16,7 @@ namespace AutoPigs.Commands.Pigs.Categories
     {
         [CommandArgument("Category", null)]
         public Category Category { get; set; }
-        public ClearBattlePicturesCommand() : base("clearBattlePictures", "COMMANDS_PIGS_CATEGORIES_CLEAR_BATTLE_PICTURES_DESCRIPTION") { }
+        public ClearBattlePicturesCommand() : base("clearPictures", "COMMANDS_PIGS_CATEGORIES_CLEAR_BATTLE_PICTURES_DESCRIPTION") { }
 
         public override void Conditions()
         {
