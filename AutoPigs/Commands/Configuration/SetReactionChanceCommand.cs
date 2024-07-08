@@ -17,7 +17,7 @@ namespace AutoPigs.Commands.Configuration
         public int? Chance { get; set; }
         [CommandArgument("category", null, optional: true)]
         public Category Category { get; set; }
-        public SetReactionChanceCommand() : base("setReactionChance", "COMMANDS_CONFIGURATION_REACTION_CHANCE_DESCRIPTION") { }
+        public SetReactionChanceCommand() : base("reactionChance", "COMMANDS_CONFIGURATION_REACTION_CHANCE_DESCRIPTION") { }
 
         public override void Conditions()
         {

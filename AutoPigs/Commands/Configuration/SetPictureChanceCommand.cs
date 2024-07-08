@@ -17,7 +17,7 @@ namespace AutoPigs.Commands.Configuration
         public int? Chance { get; set; }
         [CommandArgument("category", null, optional: true)]
         public Category Category { get; set; }
-        public SetPictureChanceCommand() : base("setPictureChance", "COMMANDS_CONFIGURATION_PICTURE_CHANCE_DESCRIPTION") { }
+        public SetPictureChanceCommand() : base("pictureChance", "COMMANDS_CONFIGURATION_PICTURE_CHANCE_DESCRIPTION") { }
 
         public override void Conditions()
         {
