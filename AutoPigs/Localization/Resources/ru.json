@@ -9,7 +9,7 @@
   "COMMANDS_GENERAL_TEST_SUCCESS": "Хрю-хрю!",
 
   "COMMANDS_ERROR_COMMAND_NOT_FOUND": "Команда не найдена.",
-  "COMMANDS_ERROR_NOT_ENOUGH_RIGHTS": "Недостаточно прав.",
+  "COMMANDS_ERROR_NOT_ENOUGH_RIGHTS": "Недостаточно прав для использования команды.",
   "COMMANDS_ERROR_SENDER_IS_PIG": "У свиней нет права на это действие.",
   "COMMANDS_ERROR_TARGET_IS_NOT_PIG": "Пользователь не является свиньёй.",
   "COMMANDS_ERROR_TARGET_IS_PIG": "Пользователь уже является свиньёй.",
